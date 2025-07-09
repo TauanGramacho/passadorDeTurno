@@ -1,38 +1,75 @@
-.App {
-  text-align: center;
+:root {
+  --verde: #009639;
+  --azul: #0076BF;
+  --laranja: #F28B00;
+  --cinza-claro: #f5f5f5;
+  --cinza-escuro: #333;
+  --branco: #ffffff;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--cinza-claro);
+  color: var(--cinza-escuro);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+header {
+  background-color: var(--verde);
+  color: var(--branco);
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+  justify-content: space-between;
+  padding: 12px 24px;
+}
+
+header img {
+  height: 40px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: var(--branco);
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+h1, h2 {
+  color: var(--verde);
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 10px;
+  margin-top: 8px;
+  margin-bottom: 16px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+button {
+  background-color: var(--verde);
+  color: var(--branco);
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+button:hover {
+  background-color: var(--azul);
+}/*  */
+
+.tag {
+  display: inline-block;
+  background-color: var(--laranja);
   color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin-right: 6px;
+  font-size: 0.85em;
 }
