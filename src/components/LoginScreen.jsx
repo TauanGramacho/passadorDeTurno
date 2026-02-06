@@ -1,77 +1,6 @@
 import React, { useState } from 'react';
 import { Lock, User, Eye, EyeOff, ArrowLeft, UserPlus, MapPin } from 'lucide-react';
-
-// ============================================================
-// DB — MESMA CAMADA USADA PELO App.jsx / PassagemTurnoApp
-// Centralizamos aqui para garantir que login e cadastro
-// leiam e escrevam no mesmo localStorage.
-// ============================================================
-const DB = (() => {
-const KEY = 'coelba_db_v2';
-
-const getDb = () => {
-try {
-const raw = localStorage.getItem(KEY);
-if (raw) return JSON.parse(raw);
-} catch {}
-// Seed: apenas o admin master existe no início
-const seed = {
-usuarios: [
-{
-  id: 'admin_master',
-  matricula: 'admin',
-  senha: btoa('admin123'),
-  nome: 'Administrador Master',
-  papel: 'admin',
-  ativo: true,
-  posto: null,
-  visibilidade: 'global',
-  criadoEm: new Date().toISOString(),
-  ultimoLogin: null
-}
-],
-passagens: [],
-configuracoes: {
-mrrObrigatorio: false,
-validacaoObrigatoria: false,
-cadastroAberto: true          // ← se true, qualquer um pode se cadastrar
-// cadastroAberto: false       // ← se false, só via código de convite
-}
-};
-localStorage.setItem(KEY, JSON.stringify(seed));
-return seed;
-};
-
-const save = (db) => localStorage.setItem(KEY, JSON.stringify(db));
-
-return {
-get: getDb,
-save,
-getUsuario: (matricula) =>
-getDb().usuarios.find(
-(u) => u.matricula.toLowerCase() === matricula.toLowerCase()
-),
-criarUsuario: (usuario) => {
-const db = getDb();
-db.usuarios.push(usuario);
-save(db);
-return usuario;
-},
-atualizarUsuario: (matricula, dados) => {
-const db = getDb();
-const idx = db.usuarios.findIndex(
-(u) => u.matricula.toLowerCase() === matricula.toLowerCase()
-);
-if (idx !== -1) {
-db.usuarios[idx] = { ...db.usuarios[idx], ...dados };
-save(db);
-return db.usuarios[idx];
-}
-return null;
-},
-getConfiguracoes: () => getDb().configuracoes
-};
-})();
+import { api } from '../api/client';
 
 const POSTOS = [
 'Feira de Santana',
@@ -170,28 +99,33 @@ const [senha, setSenha] = useState('');
 const [erro, setErro] = useState('');
 const [mostrarSenha, setMostrarSenha] = useState(false);
 
-const handleLogin = (e) => {
-e.preventDefault();
-setErro('');
-
-const usuario = DB.getUsuario(matricula);
-
-if (!usuario) {
-setErro('Usuário não encontrado');
-return;
-}
-if (!usuario.ativo) {
-setErro('Conta desativada. Contate o administrador.');
-return;
-}
-if (atob(usuario.senha) !== senha) {
-setErro('Senha incorreta');
-return;
-}
-
-// Atualiza último login e retorna usuário completo
-DB.atualizarUsuario(matricula, { ultimoLogin: new Date().toISOString() });
-onLogin({ ...usuario, ultimoLogin: new Date().toISOString() });
+const handleLogin = async (e) => {
+  e.preventDefault();
+  setErro('');
+  try {
+    const usuario = await api.usuarios.porMatricula(matricula);
+    if (!usuario) {
+      setErro('Usuário não encontrado');
+      return;
+    }
+    if (!usuario.ativo) {
+      setErro('Conta desativada. Contate o administrador.');
+      return;
+    }
+    try {
+      if (atob(usuario.senha) !== senha) {
+        setErro('Senha incorreta');
+        return;
+      }
+    } catch {
+      setErro('Senha incorreta');
+      return;
+    }
+    await api.usuarios.atualizar(matricula, { ultimoLogin: new Date().toISOString() });
+    onLogin({ ...usuario, ultimoLogin: new Date().toISOString() });
+  } catch (err) {
+    setErro(err.message || 'Erro ao conectar. Verifique se o servidor está rodando.');
+  }
 };
 
 return (
@@ -287,48 +221,44 @@ const [erro, setErro] = useState('');
 const [mostrarSenha, setMostrarSenha] = useState(false);
 const [sucesso, setSucesso] = useState(false);
 
-const handleCadastro = (e) => {
-e.preventDefault();
-setErro('');
-
-// Validações
-if (!dados.matricula.trim() || !dados.nome.trim() || !dados.senha || !dados.confirmarSenha || !dados.posto) {
-setErro('Preencha todos os campos obrigatórios.');
-return;
-}
-
-if (dados.senha.length < 6) {
-setErro('Senha deve ter pelo menos 6 caracteres.');
-return;
-}
-
-if (dados.senha !== dados.confirmarSenha) {
-setErro('As senhas não coincidem.');
-return;
-}
-
-// Verifica se matrícula já existe
-if (DB.getUsuario(dados.matricula)) {
-setErro('Matrícula já cadastrada. Escolha outra.');
-return;
-}
-
-// Cria usuário como controlador com visibilidade "global" (vê todas as passagens)
-const novoUsuario = {
-id: `usr_${Date.now()}`,
-matricula: dados.matricula.trim().toLowerCase(),
-senha: btoa(dados.senha),
-nome: dados.nome.trim(),
-papel: 'controlador',           // auto-cadastro = sempre controlador
-ativo: true,
-posto: dados.posto,
-visibilidade: 'global',         // VÊ TODAS AS PASSAGENS
-criadoEm: new Date().toISOString(),
-ultimoLogin: null
-};
-
-DB.criarUsuario(novoUsuario);
-setSucesso(true);
+const handleCadastro = async (e) => {
+  e.preventDefault();
+  setErro('');
+  if (!dados.matricula.trim() || !dados.nome.trim() || !dados.senha || !dados.confirmarSenha || !dados.posto) {
+    setErro('Preencha todos os campos obrigatórios.');
+    return;
+  }
+  if (dados.senha.length < 6) {
+    setErro('Senha deve ter pelo menos 6 caracteres.');
+    return;
+  }
+  if (dados.senha !== dados.confirmarSenha) {
+    setErro('As senhas não coincidem.');
+    return;
+  }
+  try {
+    const existente = await api.usuarios.porMatricula(dados.matricula);
+    if (existente) {
+      setErro('Matrícula já cadastrada. Escolha outra.');
+      return;
+    }
+    const novoUsuario = {
+      id: `usr_${Date.now()}`,
+      matricula: dados.matricula.trim().toLowerCase(),
+      senha: btoa(dados.senha),
+      nome: dados.nome.trim(),
+      papel: 'controlador',
+      ativo: true,
+      posto: dados.posto,
+      visibilidade: 'global',
+      criadoEm: new Date().toISOString(),
+      ultimoLogin: null
+    };
+    await api.usuarios.criar(novoUsuario);
+    setSucesso(true);
+  } catch (err) {
+    setErro(err.message || 'Erro ao cadastrar. Tente novamente.');
+  }
 };
 
 // ── Tela de sucesso ──

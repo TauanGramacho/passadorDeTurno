@@ -2,6 +2,7 @@
   "name": "sistema-turno",
   "version": "0.1.0",
   "private": true,
+  "proxy": "http://localhost:3001",
   "dependencies": {
     "ajv": "^8.17.1",
     "ajv-keywords": "^5.1.0",
@@ -17,10 +18,11 @@
     "xlsx": "^0.18.5"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "node --max-http-header-size=32768 node_modules/react-scripts/bin/react-scripts.js start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "init-db": "npm run init-db --prefix server"
   },
   "eslintConfig": {
     "extends": [

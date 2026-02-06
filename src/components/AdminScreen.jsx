@@ -1,77 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Crown, Users, Settings, Search, User, Lock, Eye, EyeOff, MapPin, Plus, X, Trash2, RotateCcw, UserCheck, UserX, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Crown, Users, Settings, Search, User, Lock, Eye, EyeOff, Plus, Trash2, CheckCircle, AlertTriangle } from 'lucide-react';
 
-// ============================================================
-// DB — MESMA CAMADA USADA PELOS OUTROS COMPONENTES
-// ============================================================
-const DB = (() => {
-  const getDb = () => {
-    try {
-      const raw = localStorage.getItem('coelba_db_v2');
-      if (raw) return JSON.parse(raw);
-    } catch {}
-    // Seed inicial
-    const seed = {
-      usuarios: [
-        {
-          id: 'admin_master',
-          matricula: 'admin',
-          senha: btoa('admin123'),
-          nome: 'Administrador Master',
-          papel: 'admin',
-          ativo: true,
-          posto: null,
-          visibilidade: 'global',
-          criadoEm: new Date().toISOString(),
-          ultimoLogin: null
-        }
-      ],
-      passagens: [],
-      configuracoes: {
-        mrrObrigatorio: false,
-        validacaoObrigatoria: false
-      }
-    };
-    localStorage.setItem('coelba_db_v2', JSON.stringify(seed));
-    return seed;
-  };
-
-  const save = (db) => localStorage.setItem('coelba_db_v2', JSON.stringify(db));
-
-  return {
-    get: getDb,
-    save,
-    getUsuarios: () => getDb().usuarios,
-    getUsuario: (matricula) => getDb().usuarios.find(u => u.matricula.toLowerCase() === matricula.toLowerCase()),
-    criarUsuario: (usuario) => {
-      const db = getDb();
-      db.usuarios.push(usuario);
-      save(db);
-      return usuario;
-    },
-    atualizarUsuario: (matricula, dados) => {
-      const db = getDb();
-      const idx = db.usuarios.findIndex(u => u.matricula.toLowerCase() === matricula.toLowerCase());
-      if (idx !== -1) {
-        db.usuarios[idx] = { ...db.usuarios[idx], ...dados };
-        save(db);
-        return db.usuarios[idx];
-      }
-      return null;
-    },
-    excluirUsuario: (matricula) => {
-      const db = getDb();
-      db.usuarios = db.usuarios.filter(u => u.matricula.toLowerCase() !== matricula.toLowerCase());
-      save(db);
-    },
-    getConfiguracoes: () => getDb().configuracoes,
-    salvarConfiguracoes: (cfg) => {
-      const db = getDb();
-      db.configuracoes = { ...db.configuracoes, ...cfg };
-      save(db);
-    }
-  };
-})();
+import { api } from '../api/client';
 
 const POSTOS = ["Feira de Santana", "Serrinha", "Alagoinhas", "Jacobina", "Juazeiro"];
 
@@ -121,25 +51,46 @@ const AdminScreen = ({ onBack, usuario }) => {
   const [modalEditar, setModalEditar] = useState(null);
   const [modalSenha, setModalSenha] = useState(null);
   const [notificacao, setNotificacao] = useState(null);
-  const [configuracoes, setConfiguracoes] = useState(DB.getConfiguracoes());
+  const [configuracoes, setConfiguracoes] = useState({ mrrObrigatorio: false, validacaoObrigatoria: false });
+  const [carregando, setCarregando] = useState(true);
 
   const mostrarToast = (mensagem, tipo = 'success') => {
     setNotificacao({ mensagem, tipo });
     setTimeout(() => setNotificacao(null), 3000);
   };
 
-  useEffect(() => { setUsuarios(DB.getUsuarios()); }, []);
+  const carregarDados = async () => {
+    try {
+      const [usuariosRes, cfgRes] = await Promise.all([
+        api.usuarios.listar(),
+        api.configuracoes.obter()
+      ]);
+      setUsuarios(Array.isArray(usuariosRes) ? usuariosRes : []);
+      setConfiguracoes(cfgRes || { mrrObrigatorio: false, validacaoObrigatoria: false });
+    } catch {
+      setUsuarios([]);
+      mostrarToast('Erro ao carregar dados do servidor', 'error');
+    } finally {
+      setCarregando(false);
+    }
+  };
 
-  const recargar = () => setUsuarios(DB.getUsuarios());
+  useEffect(() => { carregarDados(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const recargar = () => api.usuarios.listar().then((r) => setUsuarios(Array.isArray(r) ? r : [])).catch(() => setUsuarios([]));
 
   const filtrado = usuarios.filter(u =>
     u.matricula.toLowerCase().includes(busca.toLowerCase()) ||
     u.nome.toLowerCase().includes(busca.toLowerCase())
   );
 
-  const salvarConfiguracoes = () => {
-    DB.salvarConfiguracoes(configuracoes);
-    mostrarToast('Configurações salvas');
+  const salvarConfiguracoes = async () => {
+    try {
+      await api.configuracoes.salvar(configuracoes);
+      mostrarToast('Configurações salvas');
+    } catch (err) {
+      mostrarToast(err.message || 'Erro ao salvar', 'error');
+    }
   };
 
   return (
@@ -199,7 +150,10 @@ const AdminScreen = ({ onBack, usuario }) => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {filtrado.map(u => (
+                  {carregando ? (
+                    <tr><td colSpan="6" className="px-4 py-8 text-center text-slate-500">Carregando...</td></tr>
+                  ) : (
+                  filtrado.map(u => (
                     <tr key={u.id} className="hover:bg-slate-50 transition-colors">
                       <td className="px-4 py-3">
                         <div className="flex flex-col">
@@ -224,14 +178,15 @@ const AdminScreen = ({ onBack, usuario }) => {
                             <Lock size={14} />
                           </button>
                           {u.matricula !== 'admin' && (
-                            <button onClick={() => { if (window.confirm(`Excluir ${u.nome}?`)) { DB.excluirUsuario(u.matricula); recargar(); mostrarToast('Usuário excluído'); } }} className="p-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition-colors" title="Excluir">
+                            <button onClick={() => { if (window.confirm(`Excluir ${u.nome}?`)) { api.usuarios.excluir(u.matricula).then(() => { recargar(); mostrarToast('Usuário excluído'); }).catch(() => mostrarToast('Erro ao excluir', 'error')); } }} className="p-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition-colors" title="Excluir">
                               <Trash2 size={14} />
                             </button>
                           )}
                         </div>
                       </td>
                     </tr>
-                  ))}
+                  ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -294,21 +249,19 @@ const ModalCriarUsuario = ({ onClose, onSucesso }) => {
   const [erro, setErro] = useState('');
   const [mostrarSenha, setMostrarSenha] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setErro('');
-
     if (!dados.matricula.trim() || !dados.nome.trim() || !dados.senha) {
       setErro('Matrícula, nome e senha são obrigatórios');
       return;
     }
-
     if (dados.senha.length < 6) {
       setErro('Senha deve ter pelo menos 6 caracteres');
       return;
     }
-
-    if (DB.getUsuario(dados.matricula)) {
+    const existente = await api.usuarios.porMatricula(dados.matricula);
+    if (existente) {
       setErro('Matrícula já existe');
       return;
     }
@@ -326,8 +279,12 @@ const ModalCriarUsuario = ({ onClose, onSucesso }) => {
       ultimoLogin: null
     };
 
-    DB.criarUsuario(novoUsuario);
-    onSucesso('Usuário criado com sucesso');
+    try {
+      await api.usuarios.criar(novoUsuario);
+      onSucesso('Usuário criado com sucesso');
+    } catch (err) {
+      setErro(err.message || 'Erro ao criar usuário');
+    }
   };
 
   return (
@@ -427,15 +384,19 @@ const ModalEditarUsuario = ({ usuario, onClose, onSucesso }) => {
     ativo: usuario.ativo
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    DB.atualizarUsuario(usuario.matricula, {
-      papel: dados.papel,
-      posto: dados.posto || null,
-      visibilidade: dados.visibilidade,
-      ativo: dados.ativo
-    });
-    onSucesso('Usuário atualizado');
+    try {
+      await api.usuarios.atualizar(usuario.matricula, {
+        papel: dados.papel,
+        posto: dados.posto || null,
+        visibilidade: dados.visibilidade,
+        ativo: dados.ativo
+      });
+      onSucesso('Usuário atualizado');
+    } catch (err) {
+      onSucesso(err.message || 'Erro ao atualizar');
+    }
   };
 
   return (
@@ -502,22 +463,23 @@ const ModalRedefinirSenha = ({ usuario, onClose, onSucesso }) => {
   const [erro, setErro] = useState('');
   const [mostrarSenha, setMostrarSenha] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setErro('');
-
     if (novaSenha.length < 6) {
       setErro('Senha deve ter pelo menos 6 caracteres');
       return;
     }
-
     if (novaSenha !== confirmar) {
       setErro('Senhas não coincidem');
       return;
     }
-
-    DB.atualizarUsuario(usuario.matricula, { senha: btoa(novaSenha) });
-    onSucesso('Senha redefinida com sucesso');
+    try {
+      await api.usuarios.atualizar(usuario.matricula, { senha: btoa(novaSenha) });
+      onSucesso('Senha redefinida com sucesso');
+    } catch (err) {
+      setErro(err.message || 'Erro ao redefinir senha');
+    }
   };
 
   return (

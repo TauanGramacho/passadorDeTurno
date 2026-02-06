@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef, createContext, useContext } from 'react';
-import { Lock, User, Plus, X, Eye, EyeOff, LogOut, CheckCircle, XCircle, AlertTriangle, Trash2, Download, FileSpreadsheet, Filter, Shield, Users, Settings, ChevronDown, Search, Crown, UserCheck, UserX, RotateCcw, FileText, MapPin, Calendar, Clock } from 'lucide-react';
+import { User, Plus, X, Eye, LogOut, CheckCircle, XCircle, AlertTriangle, Trash2, FileSpreadsheet, Crown, FileText } from 'lucide-react';
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import AdminScreen from './AdminScreen';
+import { api } from '../api/client';
 
 // ============================================================
 // 1. CONTEXTO GLOBAL DE AUTENTICAÇÃO
@@ -12,84 +13,6 @@ import AdminScreen from './AdminScreen';
 const AuthContext = createContext(null);
 
 const useAuth = () => useContext(AuthContext);
-
-// ============================================================
-// 2. BANCO DE DADOS IN-MEMORY (substitui localStorage para usuários)
-// ============================================================
-const DB = (() => {
-  const getDb = () => {
-    try {
-      const raw = localStorage.getItem('coelba_db_v2');
-      if (raw) return JSON.parse(raw);
-    } catch {}
-    // Seed inicial
-    const seed = {
-      usuarios: [
-        {
-          id: 'admin_master',
-          matricula: 'admin',
-          senha: btoa('admin123'), // base64 simples (não é seguro em produção, mas funciona para demo)
-          nome: 'Administrador Master',
-          papel: 'admin', // 'admin' | 'controlador'
-          ativo: true,
-          posto: null, // null = todos os postos
-          visibilidade: 'global', // 'global' | 'posto' | 'proprio'
-          criadoEm: new Date().toISOString(),
-          ultimoLogin: null
-        }
-      ],
-      passagens: [],
-      configuracoes: {
-        mrrObrigatorio: false,
-        validacaoObrigatoria: false
-      }
-    };
-    localStorage.setItem('coelba_db_v2', JSON.stringify(seed));
-    return seed;
-  };
-
-  const save = (db) => localStorage.setItem('coelba_db_v2', JSON.stringify(db));
-
-  return {
-    get: getDb,
-    save,
-    getUsuarios: () => getDb().usuarios,
-    getUsuario: (matricula) => getDb().usuarios.find(u => u.matricula.toLowerCase() === matricula.toLowerCase()),
-    criarUsuario: (usuario) => {
-      const db = getDb();
-      db.usuarios.push(usuario);
-      save(db);
-      return usuario;
-    },
-    atualizarUsuario: (matricula, dados) => {
-      const db = getDb();
-      const idx = db.usuarios.findIndex(u => u.matricula.toLowerCase() === matricula.toLowerCase());
-      if (idx !== -1) {
-        db.usuarios[idx] = { ...db.usuarios[idx], ...dados };
-        save(db);
-        return db.usuarios[idx];
-      }
-      return null;
-    },
-    excluirUsuario: (matricula) => {
-      const db = getDb();
-      db.usuarios = db.usuarios.filter(u => u.matricula.toLowerCase() !== matricula.toLowerCase());
-      save(db);
-    },
-    getPassagens: () => getDb().passagens,
-    salvarPassagem: (p) => {
-      const db = getDb();
-      db.passagens.unshift(p);
-      save(db);
-    },
-    getConfiguracoes: () => getDb().configuracoes,
-    salvarConfiguracoes: (cfg) => {
-      const db = getDb();
-      db.configuracoes = { ...db.configuracoes, ...cfg };
-      save(db);
-    }
-  };
-})();
 
 // ============================================================
 // 3. CONSTANTES
@@ -112,25 +35,6 @@ const Toast = ({ notificacao }) => {
   );
 };
 
-const Badge = ({ tipo }) => {
-  const styles = {
-    admin: 'bg-yellow-100 text-yellow-800 border-yellow-300',
-    controlador: 'bg-blue-100 text-blue-700 border-blue-300'
-  };
-  return (
-    <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${styles[tipo]}`}>
-      {tipo === 'admin' ? <Crown size={10} /> : <User size={10} />}
-      {tipo}
-    </span>
-  );
-};
-
-const StatusPill = ({ ativo }) => (
-  <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider`}>
-    <span className={`w-2 h-2 rounded-full ${ativo ? 'bg-green-500' : 'bg-red-400'}`} />
-    {ativo ? 'Ativo' : 'Desativado'}
-  </span>
-);
 const PassagemTurnoApp = ({ usuario: usuarioProp, onLogout }) => {
   const authContext = useAuth();
   const usuarioContext = authContext?.usuario;
@@ -156,7 +60,7 @@ const PassagemTurnoApp = ({ usuario: usuarioProp, onLogout }) => {
   const [filtroData, setFiltroData] = useState('');
   const [notificacao, setNotificacao] = useState(null);
   const [modalConfirm, setModalConfirm] = useState(null);
-  const configuracoes = DB.getConfiguracoes();
+  const [configuracoes, setConfiguracoes] = useState({ mrrObrigatorio: false, validacaoObrigatoria: false });
 
   // Exportação individual do relatório em Excel
 const exportarRelatorioExcel = (passagem) => {
@@ -354,7 +258,14 @@ const gerarExcel = (lista) => {
     gestaoSAGE: false
   });
 
-  useEffect(() => { setPassagens(DB.getPassagens()); }, []);
+  useEffect(() => {
+    Promise.all([api.passagens.listar(), api.configuracoes.obter()])
+      .then(([lista, cfg]) => {
+        setPassagens(Array.isArray(lista) ? lista : []);
+        setConfiguracoes(cfg || { mrrObrigatorio: false, validacaoObrigatoria: false });
+      })
+      .catch(() => setPassagens([]));
+  }, []);
 
   const mostrarToast = (mensagem, tipo = 'success') => {
     setNotificacao({ mensagem, tipo });
@@ -392,7 +303,7 @@ const gerarExcel = (lista) => {
     }
   };
 
-  const salvar = () => {
+  const salvar = async () => {
     if (formData.utdsSelecionadas.length === 0 || !formData.postoOperacional) { mostrarToast("Preencha as UTDs e o Posto!", "error"); return; }
     if (configuracoes.mrrObrigatorio && !formData.mrrValidado) { mostrarToast("Validação MRR é obrigatória!", "error"); return; }
     if (configuracoes.validacaoObrigatoria && !formData.validacaoExec) { mostrarToast("Validação de Execução é obrigatória!", "error"); return; }
@@ -400,17 +311,20 @@ const gerarExcel = (lista) => {
     const agora = new Date();
     const novaPassagem = {
       ...formData,
-      id: Date.now(),
       operador: formData.operador,
       operadorId: usuario.id,
       posto: formData.postoOperacional,
       dataHora: `${formData.data.split('-').reverse().join('/')} ${agora.toLocaleTimeString('pt-BR')}`,
       utdsString: formData.utdsSelecionadas.join(', ')
     };
-    DB.salvarPassagem(novaPassagem);
-    setPassagens(DB.getPassagens());
-    mostrarToast("Registro salvo com sucesso!");
-    limparFormulario();
+    try {
+      const criada = await api.passagens.criar(novaPassagem);
+      setPassagens((prev) => [criada, ...prev]);
+      mostrarToast("Registro salvo com sucesso!");
+      limparFormulario();
+    } catch (err) {
+      mostrarToast(err.message || "Erro ao salvar", "error");
+    }
   };
 
   const limparFormulario = () => {
@@ -1231,8 +1145,8 @@ const App = ({ usuario: usuarioProp, onLogout: onLogoutProp }) => {
     );
   }
   
-  // Caso contrário, usa admin para desenvolvimento
-  const usuarioAdmin = DB.getUsuario('admin') || {
+  // Caso contrário, usa admin para desenvolvimento (sem backend)
+  const usuarioAdmin = {
     id: 'admin_master',
     matricula: 'admin',
     nome: 'Administrador Master',
