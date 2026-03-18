@@ -1,13 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Crown, Users, Settings, Search, User, Lock, Eye, EyeOff, Plus, Trash2, CheckCircle, AlertTriangle } from 'lucide-react';
-
 import { api } from '../api/client';
+import { POSTOS_OPERACIONAIS, TERMOS_LOGISTICOS } from '../constants';
 
-const POSTOS = ["Feira de Santana", "Serrinha", "Alagoinhas", "Jacobina", "Juazeiro"];
-
-// ============================================================
-// COMPONENTES UTILITÁRIOS
-// ============================================================
 const Toast = ({ notificacao }) => {
   if (!notificacao) return null;
   return (
@@ -34,16 +29,13 @@ const Badge = ({ tipo }) => {
 };
 
 const StatusPill = ({ ativo }) => (
-  <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest`}>
+  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest">
     <span className={`w-2 h-2 rounded-full ${ativo ? 'bg-green-500' : 'bg-red-400'}`} />
     {ativo ? 'Ativo' : 'Desativado'}
   </span>
 );
 
-// ============================================================
-// PAINEL ADMIN (COMPONENTE PRINCIPAL)
-// ============================================================
-const AdminScreen = ({ onBack, usuario }) => {
+const AdminScreen = ({ onBack }) => {
   const [abaNativa, setAbaNativa] = useState('usuarios');
   const [usuarios, setUsuarios] = useState([]);
   const [busca, setBusca] = useState('');
@@ -75,11 +67,14 @@ const AdminScreen = ({ onBack, usuario }) => {
     }
   };
 
-  useEffect(() => { carregarDados(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    carregarDados();
+  }, []);
 
-  const recargar = () => api.usuarios.listar().then((r) => setUsuarios(Array.isArray(r) ? r : [])).catch(() => setUsuarios([]));
+  const recarregar = () =>
+    api.usuarios.listar().then((r) => setUsuarios(Array.isArray(r) ? r : [])).catch(() => setUsuarios([]));
 
-  const filtrado = usuarios.filter(u =>
+  const filtrado = usuarios.filter((u) =>
     u.matricula.toLowerCase().includes(busca.toLowerCase()) ||
     u.nome.toLowerCase().includes(busca.toLowerCase())
   );
@@ -87,7 +82,7 @@ const AdminScreen = ({ onBack, usuario }) => {
   const salvarConfiguracoes = async () => {
     try {
       await api.configuracoes.salvar(configuracoes);
-      mostrarToast('Configurações salvas');
+      mostrarToast('Configuracoes salvas');
     } catch (err) {
       mostrarToast(err.message || 'Erro ao salvar', 'error');
     }
@@ -97,7 +92,6 @@ const AdminScreen = ({ onBack, usuario }) => {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <Toast notificacao={notificacao} />
 
-      {/* Header Admin */}
       <header className="bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 text-white shadow-lg">
         <div className="max-w-7xl mx-auto px-4 py-5 flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -105,35 +99,34 @@ const AdminScreen = ({ onBack, usuario }) => {
               <Crown size={24} className="text-slate-800" />
             </div>
             <div>
-              <h1 className="text-xl font-bold tracking-tight">Painel de Administração</h1>
-              <p className="text-slate-400 text-xs font-medium uppercase tracking-widest">Gerenciamento do Sistema</p>
+              <h1 className="text-xl font-bold tracking-tight">Painel de Administracao</h1>
+              <p className="text-slate-400 text-xs font-medium uppercase tracking-widest">Gerenciamento do sistema logistico</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <button onClick={() => setAbaNativa('usuarios')} className={`px-4 py-2 rounded-lg font-semibold text-xs uppercase tracking-wider flex items-center gap-2 transition-all ${abaNativa === 'usuarios' ? 'bg-yellow-400 text-slate-800 shadow' : 'bg-slate-700 hover:bg-slate-600 text-slate-300'}`}>
-              <Users size={14} /> Usuários
+              <Users size={14} /> Usuarios
             </button>
             <button onClick={() => setAbaNativa('configuracoes')} className={`px-4 py-2 rounded-lg font-semibold text-xs uppercase tracking-wider flex items-center gap-2 transition-all ${abaNativa === 'configuracoes' ? 'bg-yellow-400 text-slate-800 shadow' : 'bg-slate-700 hover:bg-slate-600 text-slate-300'}`}>
               <Settings size={14} /> Regras
             </button>
             <button onClick={onBack} className="px-4 py-2 bg-slate-600 hover:bg-slate-500 text-white rounded-lg font-semibold text-xs uppercase tracking-wider transition-all">
-              ← Voltar
+              Voltar
             </button>
           </div>
         </div>
       </header>
 
       <div className="max-w-7xl mx-auto p-6">
-        {/* ABA USUÁRIOS */}
         {abaNativa === 'usuarios' && (
           <div className="space-y-4">
             <div className="flex items-center justify-between gap-3">
               <div className="relative flex-1">
                 <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input type="text" value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Buscar por matrícula ou nome..." className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 outline-none" />
+                <input type="text" value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Buscar por matricula ou nome..." className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 outline-none" />
               </div>
               <button onClick={() => setModalCriar(true)} className="px-5 py-3 bg-yellow-400 hover:bg-yellow-500 text-slate-800 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-lg transition-all">
-                <Plus size={16} /> Novo Usuário
+                <Plus size={16} /> Novo Usuario
               </button>
             </div>
 
@@ -141,51 +134,64 @@ const AdminScreen = ({ onBack, usuario }) => {
               <table className="w-full">
                 <thead className="bg-slate-50 border-b">
                   <tr>
-                    <th className="px-4 py-3 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Usuário</th>
+                    <th className="px-4 py-3 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Usuario</th>
                     <th className="px-4 py-3 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Papel</th>
-                    <th className="px-4 py-3 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Posto</th>
+                    <th className="px-4 py-3 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Hub</th>
                     <th className="px-4 py-3 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Visibilidade</th>
                     <th className="px-4 py-3 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Status</th>
-                    <th className="px-4 py-3 text-right text-[10px] font-black text-slate-500 uppercase tracking-widest">Ações</th>
+                    <th className="px-4 py-3 text-right text-[10px] font-black text-slate-500 uppercase tracking-widest">Acoes</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {carregando ? (
                     <tr><td colSpan="6" className="px-4 py-8 text-center text-slate-500">Carregando...</td></tr>
                   ) : (
-                  filtrado.map(u => (
-                    <tr key={u.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-4 py-3">
-                        <div className="flex flex-col">
-                          <span className="font-bold text-sm text-slate-800 uppercase tracking-tight">{u.matricula}</span>
-                          <span className="text-xs text-slate-500">{u.nome}</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3"><Badge tipo={u.papel} /></td>
-                      <td className="px-4 py-3"><span className="text-xs font-semibold text-slate-600">{u.posto || 'Todos'}</span></td>
-                      <td className="px-4 py-3">
-                        <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded ${u.visibilidade === 'global' ? 'bg-green-100 text-green-700' : u.visibilidade === 'posto' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}`}>
-                          {u.visibilidade === 'global' ? 'Global' : u.visibilidade === 'posto' ? 'Posto' : 'Próprio'}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3"><StatusPill ativo={u.ativo} /></td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center justify-end gap-2">
-                          <button onClick={() => setModalEditar(u)} className="p-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg transition-colors" title="Editar">
-                            <Settings size={14} />
-                          </button>
-                          <button onClick={() => setModalSenha(u)} className="p-1.5 bg-orange-50 hover:bg-orange-100 text-orange-600 rounded-lg transition-colors" title="Redefinir senha">
-                            <Lock size={14} />
-                          </button>
-                          {u.matricula !== 'admin' && (
-                            <button onClick={() => { if (window.confirm(`Excluir ${u.nome}?`)) { api.usuarios.excluir(u.matricula).then(() => { recargar(); mostrarToast('Usuário excluído'); }).catch(() => mostrarToast('Erro ao excluir', 'error')); } }} className="p-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition-colors" title="Excluir">
-                              <Trash2 size={14} />
+                    filtrado.map((u) => (
+                      <tr key={u.id} className="hover:bg-slate-50 transition-colors">
+                        <td className="px-4 py-3">
+                          <div className="flex flex-col">
+                            <span className="font-bold text-sm text-slate-800 uppercase tracking-tight">{u.matricula}</span>
+                            <span className="text-xs text-slate-500">{u.nome}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3"><Badge tipo={u.papel} /></td>
+                        <td className="px-4 py-3"><span className="text-xs font-semibold text-slate-600">{u.posto || 'Todos'}</span></td>
+                        <td className="px-4 py-3">
+                          <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded ${u.visibilidade === 'global' ? 'bg-green-100 text-green-700' : u.visibilidade === 'posto' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}`}>
+                            {u.visibilidade === 'global' ? 'Global' : u.visibilidade === 'posto' ? 'Hub' : 'Proprio'}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3"><StatusPill ativo={u.ativo} /></td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center justify-end gap-2">
+                            <button onClick={() => setModalEditar(u)} className="p-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg transition-colors" title="Editar">
+                              <Settings size={14} />
                             </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))
+                            <button onClick={() => setModalSenha(u)} className="p-1.5 bg-orange-50 hover:bg-orange-100 text-orange-600 rounded-lg transition-colors" title="Redefinir senha">
+                              <Lock size={14} />
+                            </button>
+                            {u.matricula !== 'admin' && (
+                              <button
+                                onClick={() => {
+                                  if (window.confirm(`Excluir ${u.nome}?`)) {
+                                    api.usuarios.excluir(u.matricula)
+                                      .then(() => {
+                                        recarregar();
+                                        mostrarToast('Usuario excluido');
+                                      })
+                                      .catch(() => mostrarToast('Erro ao excluir', 'error'));
+                                  }
+                                }}
+                                className="p-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition-colors"
+                                title="Excluir"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))
                   )}
                 </tbody>
               </table>
@@ -193,49 +199,40 @@ const AdminScreen = ({ onBack, usuario }) => {
           </div>
         )}
 
-        {/* ABA CONFIGURAÇÕES */}
         {abaNativa === 'configuracoes' && (
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-6">
-            <h2 className="text-lg font-bold text-slate-800 border-b pb-3">Regras de Preenchimento</h2>
-            
+            <h2 className="text-lg font-bold text-slate-800 border-b pb-3">Regras de preenchimento</h2>
+
             <label className="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer">
               <div className="flex-1">
-                <p className="font-bold text-sm text-slate-800">MRR Obrigatório</p>
-                <p className="text-xs text-slate-500 mt-1">Exigir preenchimento do campo "Lançamentos MRR"</p>
+                <p className="font-bold text-sm text-slate-800">{TERMOS_LOGISTICOS.mrr} obrigatorio</p>
+                <p className="text-xs text-slate-500 mt-1">Exigir preenchimento do campo "{TERMOS_LOGISTICOS.mrr}"</p>
               </div>
               <input type="checkbox" checked={configuracoes.mrrObrigatorio} onChange={(e) => setConfiguracoes({ ...configuracoes, mrrObrigatorio: e.target.checked })} className="w-5 h-5 text-yellow-400 rounded focus:ring-2 focus:ring-yellow-400" />
             </label>
 
             <label className="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer">
               <div className="flex-1">
-                <p className="font-bold text-sm text-slate-800">Validação Obrigatória</p>
-                <p className="text-xs text-slate-500 mt-1">Exigir que pelo menos DSES, CHI ou COMP estejam marcados</p>
+                <p className="font-bold text-sm text-slate-800">{TERMOS_LOGISTICOS.validacaoExecucao} obrigatorio</p>
+                <p className="text-xs text-slate-500 mt-1">Exigir confirmacao do checklist principal antes de salvar</p>
               </div>
               <input type="checkbox" checked={configuracoes.validacaoObrigatoria} onChange={(e) => setConfiguracoes({ ...configuracoes, validacaoObrigatoria: e.target.checked })} className="w-5 h-5 text-yellow-400 rounded focus:ring-2 focus:ring-yellow-400" />
             </label>
 
             <button onClick={salvarConfiguracoes} className="w-full py-3 bg-yellow-400 hover:bg-yellow-500 text-slate-800 rounded-xl font-bold text-sm uppercase tracking-wider shadow-lg transition-all">
-              Salvar Configurações
+              Salvar configuracoes
             </button>
           </div>
         )}
       </div>
 
-      {/* MODAL CRIAR USUÁRIO */}
-      {modalCriar && <ModalCriarUsuario onClose={() => { setModalCriar(false); recargar(); }} onSucesso={(msg) => { mostrarToast(msg); setModalCriar(false); recargar(); }} />}
-
-      {/* MODAL EDITAR USUÁRIO */}
-      {modalEditar && <ModalEditarUsuario usuario={modalEditar} onClose={() => { setModalEditar(null); recargar(); }} onSucesso={(msg) => { mostrarToast(msg); setModalEditar(null); recargar(); }} />}
-
-      {/* MODAL REDEFINIR SENHA */}
+      {modalCriar && <ModalCriarUsuario onClose={() => { setModalCriar(false); recarregar(); }} onSucesso={(msg) => { mostrarToast(msg); setModalCriar(false); recarregar(); }} />}
+      {modalEditar && <ModalEditarUsuario usuario={modalEditar} onClose={() => { setModalEditar(null); recarregar(); }} onSucesso={(msg) => { mostrarToast(msg); setModalEditar(null); recarregar(); }} />}
       {modalSenha && <ModalRedefinirSenha usuario={modalSenha} onClose={() => setModalSenha(null)} onSucesso={(msg) => { mostrarToast(msg); setModalSenha(null); }} />}
     </div>
   );
 };
 
-// ============================================================
-// MODAL CRIAR USUÁRIO
-// ============================================================
 const ModalCriarUsuario = ({ onClose, onSucesso }) => {
   const [dados, setDados] = useState({
     matricula: '',
@@ -253,7 +250,7 @@ const ModalCriarUsuario = ({ onClose, onSucesso }) => {
     e.preventDefault();
     setErro('');
     if (!dados.matricula.trim() || !dados.nome.trim() || !dados.senha) {
-      setErro('Matrícula, nome e senha são obrigatórios');
+      setErro('Matricula, nome e senha sao obrigatorios');
       return;
     }
     if (dados.senha.length < 6) {
@@ -262,7 +259,7 @@ const ModalCriarUsuario = ({ onClose, onSucesso }) => {
     }
     const existente = await api.usuarios.porMatricula(dados.matricula);
     if (existente) {
-      setErro('Matrícula já existe');
+      setErro('Matricula ja existe');
       return;
     }
 
@@ -281,9 +278,9 @@ const ModalCriarUsuario = ({ onClose, onSucesso }) => {
 
     try {
       await api.usuarios.criar(novoUsuario);
-      onSucesso('Usuário criado com sucesso');
+      onSucesso('Usuario criado com sucesso');
     } catch (err) {
-      setErro(err.message || 'Erro ao criar usuário');
+      setErro(err.message || 'Erro ao criar usuario');
     }
   };
 
@@ -292,31 +289,31 @@ const ModalCriarUsuario = ({ onClose, onSucesso }) => {
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
         <div className="bg-gradient-to-r from-yellow-400 to-orange-400 p-6 text-slate-800">
           <h3 className="text-xl font-black uppercase tracking-tight flex items-center gap-2">
-            <Plus size={20} /> Criar Novo Usuário
+            <Plus size={20} /> Criar novo usuario
           </h3>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>
-            <label className="text-xs font-semibold text-slate-500 uppercase mb-1 block">Matrícula *</label>
+            <label className="text-xs font-semibold text-slate-500 uppercase mb-1 block">Matricula *</label>
             <input type="text" value={dados.matricula} onChange={(e) => {
-              const valor = e.target.value.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^A-Z0-9]/g, "");
+              const valor = e.target.value.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Z0-9]/g, '');
               setDados({ ...dados, matricula: valor });
-            }} className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 outline-none" placeholder="Ex: B000000" />
+            }} className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 outline-none" placeholder="Ex: OP1001" />
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-slate-500 uppercase mb-1 block">Nome Completo *</label>
+            <label className="text-xs font-semibold text-slate-500 uppercase mb-1 block">Nome completo *</label>
             <input type="text" value={dados.nome} onChange={(e) => {
-              const valor = e.target.value.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^A-Z\s]/g, "");
+              const valor = e.target.value.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Z\s]/g, '');
               setDados({ ...dados, nome: valor });
-            }} className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 outline-none" placeholder="Ex: JOAO SILVA" />
+            }} className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 outline-none" placeholder="Ex: ANA COSTA" />
           </div>
 
           <div>
             <label className="text-xs font-semibold text-slate-500 uppercase mb-1 block">Senha *</label>
             <div className="relative">
-              <input type={mostrarSenha ? 'text' : 'password'} value={dados.senha} onChange={(e) => setDados({ ...dados, senha: e.target.value })} className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 outline-none pr-12" placeholder="Mínimo 6 caracteres" />
+              <input type={mostrarSenha ? 'text' : 'password'} value={dados.senha} onChange={(e) => setDados({ ...dados, senha: e.target.value })} className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 outline-none pr-12" placeholder="Minimo 6 caracteres" />
               <button type="button" onClick={() => setMostrarSenha(!mostrarSenha)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
                 {mostrarSenha ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
@@ -332,19 +329,19 @@ const ModalCriarUsuario = ({ onClose, onSucesso }) => {
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-slate-500 uppercase mb-1 block">Posto</label>
+            <label className="text-xs font-semibold text-slate-500 uppercase mb-1 block">Hub logistico</label>
             <select value={dados.posto} onChange={(e) => setDados({ ...dados, posto: e.target.value })} className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 outline-none">
-              <option value="">Todos os postos</option>
-              {POSTOS.map(p => <option key={p} value={p}>{p}</option>)}
+              <option value="">Todos os hubs</option>
+              {POSTOS_OPERACIONAIS.map((p) => <option key={p} value={p}>{p}</option>)}
             </select>
           </div>
 
           <div>
             <label className="text-xs font-semibold text-slate-500 uppercase mb-1 block">Visibilidade</label>
             <select value={dados.visibilidade} onChange={(e) => setDados({ ...dados, visibilidade: e.target.value })} className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 outline-none">
-              <option value="global">Global (todas as passagens)</option>
-              <option value="posto">Posto (apenas do seu posto)</option>
-              <option value="proprio">Próprio (apenas as suas)</option>
+              <option value="global">Global (todos os registros)</option>
+              <option value="posto">Hub (apenas do seu hub)</option>
+              <option value="proprio">Proprio (apenas os seus)</option>
             </select>
           </div>
 
@@ -364,7 +361,7 @@ const ModalCriarUsuario = ({ onClose, onSucesso }) => {
               Cancelar
             </button>
             <button type="submit" className="flex-1 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-slate-800 rounded-xl font-bold text-xs uppercase tracking-wider shadow-lg transition-all">
-              Criar Usuário
+              Criar usuario
             </button>
           </div>
         </form>
@@ -373,9 +370,6 @@ const ModalCriarUsuario = ({ onClose, onSucesso }) => {
   );
 };
 
-// ============================================================
-// MODAL EDITAR USUÁRIO
-// ============================================================
 const ModalEditarUsuario = ({ usuario, onClose, onSucesso }) => {
   const [dados, setDados] = useState({
     papel: usuario.papel,
@@ -393,7 +387,7 @@ const ModalEditarUsuario = ({ usuario, onClose, onSucesso }) => {
         visibilidade: dados.visibilidade,
         ativo: dados.ativo
       });
-      onSucesso('Usuário atualizado');
+      onSucesso('Usuario atualizado');
     } catch (err) {
       onSucesso(err.message || 'Erro ao atualizar');
     }
@@ -404,7 +398,7 @@ const ModalEditarUsuario = ({ usuario, onClose, onSucesso }) => {
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
         <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-6 text-white">
           <h3 className="text-xl font-black uppercase tracking-tight flex items-center gap-2">
-            <Settings size={20} /> Editar Usuário
+            <Settings size={20} /> Editar usuario
           </h3>
           <p className="text-blue-100 text-xs mt-1">{usuario.nome}</p>
         </div>
@@ -419,19 +413,19 @@ const ModalEditarUsuario = ({ usuario, onClose, onSucesso }) => {
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-slate-500 uppercase mb-1 block">Posto</label>
+            <label className="text-xs font-semibold text-slate-500 uppercase mb-1 block">Hub logistico</label>
             <select value={dados.posto} onChange={(e) => setDados({ ...dados, posto: e.target.value })} className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none">
-              <option value="">Todos os postos</option>
-              {POSTOS.map(p => <option key={p} value={p}>{p}</option>)}
+              <option value="">Todos os hubs</option>
+              {POSTOS_OPERACIONAIS.map((p) => <option key={p} value={p}>{p}</option>)}
             </select>
           </div>
 
           <div>
             <label className="text-xs font-semibold text-slate-500 uppercase mb-1 block">Visibilidade</label>
             <select value={dados.visibilidade} onChange={(e) => setDados({ ...dados, visibilidade: e.target.value })} className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none">
-              <option value="global">Global (todas as passagens)</option>
-              <option value="posto">Posto (apenas do seu posto)</option>
-              <option value="proprio">Próprio (apenas as suas)</option>
+              <option value="global">Global (todos os registros)</option>
+              <option value="posto">Hub (apenas do seu hub)</option>
+              <option value="proprio">Proprio (apenas os seus)</option>
             </select>
           </div>
 
@@ -445,7 +439,7 @@ const ModalEditarUsuario = ({ usuario, onClose, onSucesso }) => {
               Cancelar
             </button>
             <button type="submit" className="flex-1 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-bold text-xs uppercase tracking-wider shadow-lg transition-all">
-              Salvar Alterações
+              Salvar alteracoes
             </button>
           </div>
         </form>
@@ -454,9 +448,6 @@ const ModalEditarUsuario = ({ usuario, onClose, onSucesso }) => {
   );
 };
 
-// ============================================================
-// MODAL REDEFINIR SENHA
-// ============================================================
 const ModalRedefinirSenha = ({ usuario, onClose, onSucesso }) => {
   const [novaSenha, setNovaSenha] = useState('');
   const [confirmar, setConfirmar] = useState('');
@@ -471,7 +462,7 @@ const ModalRedefinirSenha = ({ usuario, onClose, onSucesso }) => {
       return;
     }
     if (novaSenha !== confirmar) {
-      setErro('Senhas não coincidem');
+      setErro('Senhas nao coincidem');
       return;
     }
     try {
@@ -487,16 +478,16 @@ const ModalRedefinirSenha = ({ usuario, onClose, onSucesso }) => {
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
         <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-6 text-white">
           <h3 className="text-xl font-black uppercase tracking-tight flex items-center gap-2">
-            <Lock size={20} /> Redefinir Senha
+            <Lock size={20} /> Redefinir senha
           </h3>
           <p className="text-orange-100 text-xs mt-1">{usuario.nome}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>
-            <label className="text-xs font-semibold text-slate-500 uppercase mb-1 block">Nova Senha</label>
+            <label className="text-xs font-semibold text-slate-500 uppercase mb-1 block">Nova senha</label>
             <div className="relative">
-              <input type={mostrarSenha ? 'text' : 'password'} value={novaSenha} onChange={(e) => setNovaSenha(e.target.value)} className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none pr-12" placeholder="Mínimo 6 caracteres" />
+              <input type={mostrarSenha ? 'text' : 'password'} value={novaSenha} onChange={(e) => setNovaSenha(e.target.value)} className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none pr-12" placeholder="Minimo 6 caracteres" />
               <button type="button" onClick={() => setMostrarSenha(!mostrarSenha)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
                 {mostrarSenha ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
@@ -504,7 +495,7 @@ const ModalRedefinirSenha = ({ usuario, onClose, onSucesso }) => {
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-slate-500 uppercase mb-1 block">Confirmar Senha</label>
+            <label className="text-xs font-semibold text-slate-500 uppercase mb-1 block">Confirmar senha</label>
             <input type={mostrarSenha ? 'text' : 'password'} value={confirmar} onChange={(e) => setConfirmar(e.target.value)} className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none" placeholder="Digite novamente" />
           </div>
 
@@ -519,7 +510,7 @@ const ModalRedefinirSenha = ({ usuario, onClose, onSucesso }) => {
               Cancelar
             </button>
             <button type="submit" className="flex-1 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-bold text-xs uppercase tracking-wider shadow-lg transition-all">
-              Redefinir Senha
+              Redefinir senha
             </button>
           </div>
         </form>

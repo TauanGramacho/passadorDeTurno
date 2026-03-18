@@ -53,7 +53,7 @@ const run = async () => {
       await client.query(
         `INSERT INTO usuarios (id, matricula, senha, nome, papel, ativo, posto, visibilidade, criado_em)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-        ['admin_master', 'admin', senhaBase64, 'Administrador Master', 'admin', true, null, 'global', new Date().toISOString()]
+        ['admin_master', 'admin', senhaBase64, 'Administrador Logistico', 'admin', true, null, 'global', new Date().toISOString()]
       );
       console.log('Usuário admin criado (matrícula: admin, senha: admin)');
     } else {

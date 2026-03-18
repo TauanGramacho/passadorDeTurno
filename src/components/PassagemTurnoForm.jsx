@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef, createContext, useContext } from 'react';
-import { User, Plus, X, Eye, LogOut, CheckCircle, XCircle, AlertTriangle, Trash2, FileSpreadsheet, Crown, FileText } from 'lucide-react';
+import { Plus, X, Eye, LogOut, CheckCircle, XCircle, AlertTriangle, Trash2, FileSpreadsheet, Crown, FileText } from 'lucide-react';
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import AdminScreen from './AdminScreen';
 import { api } from '../api/client';
+import { BRAND, LISTA_AREAS, OPERADORES_GENERICOS, POSTOS_OPERACIONAIS, TERMOS_LOGISTICOS } from '../constants';
 
 // ============================================================
 // 1. CONTEXTO GLOBAL DE AUTENTICAÇÃO
@@ -17,8 +18,8 @@ const useAuth = () => useContext(AuthContext);
 // ============================================================
 // 3. CONSTANTES
 // ============================================================
-const POSTOS = ["Feira de Santana", "Serrinha", "Alagoinhas", "Jacobina", "Juazeiro"];
-const LISTA_UTDS = ["ALAGOINHAS","ESPLANADA","PAULO AFONSO","RIBEIRA DO POMBAL","JACOBINA","JUAZEIRO","REMANSO","SENHOR DO BONFIM","CONCEICAO DO COITE","FEIRA DE SANTANA NORTE","FEIRA DE SANTANA SUL","SANTO AMARO","SERRINHA","CAMACARI","CANDEIAS","LAURO DE FREITAS","GRACA","ITAPOAN","PERIPERI","PIRAJA","PITUBA","AMARGOSA","IPIAU","SANTO ANTONIO DE JESUS","VALENCA","EUNAPOLIS","ILHEUS","ITABUNA","PORTO SEGURO","POSTO DA MATA","TEIXEIRA DE FREITAS","BRUMADO","GUANAMBI","ITAPETINGA","VITORIA DA CONQUISTA","IRECE","ITABERABA","JEQUIE","LIVRAMENTO DE NOSSA SENHORA","SEABRA","BARREIRAS","BOM JESUS DA LAPA","IBOTIRAMA","LUIS EDUARDO MAGALHAES","SANTA MARIA DA VITORIA"];
+const POSTOS = POSTOS_OPERACIONAIS;
+const LISTA_UTDS = LISTA_AREAS;
 
 // ============================================================
 // 4. COMPONENTES UTILITÁRIOS
@@ -69,67 +70,67 @@ const exportarRelatorioExcel = (passagem) => {
   
   // Aba 1: Informações Gerais
   const dadosGerais = [
-    ['RELATÓRIO DE OPERAÇÃO'],
+    [TERMOS_LOGISTICOS.relatorio.toUpperCase()],
     [],
     ['Operador:', passagem.operador || ''],
-    ['Posto:', passagem.posto || passagem.postoOperacional || ''],
+    [`${TERMOS_LOGISTICOS.posto}:`, passagem.posto || passagem.postoOperacional || ''],
     ['Data/Hora:', passagem.dataHora || ''],
     ['Turno:', passagem.turno || ''],
     [],
-    ['VALIDAÇÕES'],
-    ['Validação de Execução:', passagem.validacaoExec ? 'SIM' : 'NÃO'],
-    ['DSES:', passagem.validacaoDSES ? 'SIM' : 'NÃO'],
-    ['CHI:', passagem.validacaoCHI ? 'SIM' : 'NÃO'],
-    ['COMP:', passagem.validacaoComp ? 'SIM' : 'NÃO'],
-    ['Manobras Validado:', passagem.manobrasValidado ? 'SIM' : 'NÃO'],
-    ['MRR Validado:', passagem.mrrValidado ? 'SIM' : 'NÃO'],
+    ['CHECKLISTS'],
+    [`${TERMOS_LOGISTICOS.validacaoExecucao}:`, passagem.validacaoExec ? 'SIM' : 'NAO'],
+    [`${TERMOS_LOGISTICOS.dses}:`, passagem.validacaoDSES ? 'SIM' : 'NAO'],
+    [`${TERMOS_LOGISTICOS.chi}:`, passagem.validacaoCHI ? 'SIM' : 'NAO'],
+    [`${TERMOS_LOGISTICOS.comp}:`, passagem.validacaoComp ? 'SIM' : 'NAO'],
+    [`${TERMOS_LOGISTICOS.manobras}:`, passagem.manobrasValidado ? 'SIM' : 'NAO'],
+    [`${TERMOS_LOGISTICOS.mrr}:`, passagem.mrrValidado ? 'SIM' : 'NAO'],
     [],
-    ['UTDs ATENDIDAS'],
+    [TERMOS_LOGISTICOS.unidadePlural.toUpperCase()],
     [passagem.utdsString || (Array.isArray(passagem.utdsSelecionadas) ? passagem.utdsSelecionadas.join(', ') : '')]
   ];
   
   const wsGeral = XLSX.utils.aoa_to_sheet(dadosGerais);
-  XLSX.utils.book_append_sheet(wb, wsGeral, "Informações Gerais");
+  XLSX.utils.book_append_sheet(wb, wsGeral, "Dados Gerais");
   
   // Aba 2: Ocorrências
   if (passagem.ocorrenciasGerais && passagem.ocorrenciasGerais.length > 0) {
     const ocorrenciasData = [
-      ['Prioridade', 'Tipo', 'Detalhe'],
+      ['Prioridade', TERMOS_LOGISTICOS.ocorrenciaCodigo, 'Detalhe'],
       ...passagem.ocorrenciasGerais.map(oc => [oc.prioridade, oc.tipo, oc.detalhe])
     ];
     
     const wsOcorrencias = XLSX.utils.aoa_to_sheet(ocorrenciasData);
-    XLSX.utils.book_append_sheet(wb, wsOcorrencias, "Ocorrências");
+    XLSX.utils.book_append_sheet(wb, wsOcorrencias, "Ocorrencias");
   }
   
   // Aba 3: Observações Técnicas
   const observacoes = [
-    ['OBSERVAÇÕES TÉCNICAS'],
+    [TERMOS_LOGISTICOS.validacoesTecnicas.toUpperCase()],
     [],
-    ['DSES:', passagem.validacaoDSESTexto || 'Nenhuma'],
+    [`${TERMOS_LOGISTICOS.dses}:`, passagem.validacaoDSESTexto || 'Nenhuma'],
     [],
-    ['CHI:', passagem.validacaoCHITexto || 'Nenhuma'],
+    [`${TERMOS_LOGISTICOS.chi}:`, passagem.validacaoCHITexto || 'Nenhuma'],
     [],
-    ['COMP:', passagem.validacaoCompTexto || 'Nenhuma']
+    [`${TERMOS_LOGISTICOS.comp}:`, passagem.validacaoCompTexto || 'Nenhuma']
   ];
   
   const wsObservacoes = XLSX.utils.aoa_to_sheet(observacoes);
-  XLSX.utils.book_append_sheet(wb, wsObservacoes, "Observações Técnicas");
+  XLSX.utils.book_append_sheet(wb, wsObservacoes, "Checklists Tecnicos");
   
   // Aba 4: Manobras e MRR
   const manobrasMRR = [
-    ['MANOBRAS PENDENTES'],
+    [TERMOS_LOGISTICOS.manobras.toUpperCase()],
     [passagem.manobras || 'Nenhuma'],
     [],
-    ['LANÇAMENTOS MRR'],
+    [TERMOS_LOGISTICOS.mrrPlural.toUpperCase()],
     [passagem.lancamentoMRR || 'Nenhum']
   ];
   
   const wsManobras = XLSX.utils.aoa_to_sheet(manobrasMRR);
-  XLSX.utils.book_append_sheet(wb, wsManobras, "Manobras e MRR");
+  XLSX.utils.book_append_sheet(wb, wsManobras, "Movimentos");
   
   // Salvar arquivo
-  const nomeArquivo = `Relatorio_Operacao_${passagem.id || Date.now()}.xlsx`;
+  const nomeArquivo = `Relatorio_Turno_Logistico_${passagem.id || Date.now()}.xlsx`;
   const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
   saveAs(new Blob([wbout], { type: 'application/octet-stream' }), nomeArquivo);
 };
@@ -142,7 +143,7 @@ const gerarPDF = (lista) => {
   // Título
   doc.setFontSize(18);
   doc.setFont(undefined, 'bold');
-  doc.text("HISTÓRICO OPERACIONAL", 105, 20, { align: "center" });
+  doc.text(TERMOS_LOGISTICOS.historico.toUpperCase(), 105, 20, { align: "center" });
   
   doc.setFontSize(10);
   doc.setFont(undefined, 'normal');
@@ -161,7 +162,7 @@ const gerarPDF = (lista) => {
   
   autoTable(doc, {
     startY: 40,
-    head: [['Data/Hora', 'Operador', 'Posto', 'Turno', 'UTDs', 'Ocorrências']],
+    head: [['Data/Hora', 'Operador', TERMOS_LOGISTICOS.posto, 'Turno', TERMOS_LOGISTICOS.unidadePlural, 'Ocorrencias']],
     body: dadosTabela,
     theme: 'grid',
     headStyles: { 
@@ -183,7 +184,7 @@ const gerarPDF = (lista) => {
   });
   
   // Salvar
-  doc.save(`Historico_Operacional_${new Date().getTime()}.pdf`);
+  doc.save(`Historico_Logistico_${new Date().getTime()}.pdf`);
 };
 
 // Exportar histórico para Excel
@@ -192,11 +193,11 @@ const gerarExcel = (lista) => {
   
   // Aba 1: Resumo do Histórico
   const dadosResumo = [
-    ['HISTÓRICO OPERACIONAL'],
+    [TERMOS_LOGISTICOS.historico.toUpperCase()],
     [`Gerado em: ${new Date().toLocaleString('pt-BR')}`],
     [`Total de registros: ${lista.length}`],
     [],
-    ['Data/Hora', 'Operador', 'Posto', 'Turno', 'UTDs', 'Ocorrências'],
+    ['Data/Hora', 'Operador', TERMOS_LOGISTICOS.posto, 'Turno', TERMOS_LOGISTICOS.unidadePlural, 'Ocorrencias'],
     ...lista.map(p => [
       p.dataHora || '',
       p.operador || '',
@@ -219,18 +220,18 @@ const gerarExcel = (lista) => {
     dadosDetalhes.push(['=== REGISTRO ' + (idx + 1) + ' ===']);
     dadosDetalhes.push(['Data/Hora:', p.dataHora || '']);
     dadosDetalhes.push(['Operador:', p.operador || '']);
-    dadosDetalhes.push(['Posto:', p.posto || p.postoOperacional || '']);
+    dadosDetalhes.push([`${TERMOS_LOGISTICOS.posto}:`, p.posto || p.postoOperacional || '']);
     dadosDetalhes.push(['Turno:', p.turno || '']);
-    dadosDetalhes.push(['UTDs:', p.utdsString || (Array.isArray(p.utdsSelecionadas) ? p.utdsSelecionadas.join(', ') : '')]);
-    dadosDetalhes.push(['Validação Execução:', p.validacaoExec ? 'SIM' : 'NÃO']);
-    dadosDetalhes.push(['DSES:', p.validacaoDSES ? 'SIM' : 'NÃO']);
-    dadosDetalhes.push(['CHI:', p.validacaoCHI ? 'SIM' : 'NÃO']);
-    dadosDetalhes.push(['COMP:', p.validacaoComp ? 'SIM' : 'NÃO']);
-    dadosDetalhes.push(['Manobras:', p.manobras || 'Nenhuma']);
-    dadosDetalhes.push(['MRR:', p.lancamentoMRR || 'Nenhum']);
+    dadosDetalhes.push([`${TERMOS_LOGISTICOS.unidadePlural}:`, p.utdsString || (Array.isArray(p.utdsSelecionadas) ? p.utdsSelecionadas.join(', ') : '')]);
+    dadosDetalhes.push([`${TERMOS_LOGISTICOS.validacaoExecucao}:`, p.validacaoExec ? 'SIM' : 'NAO']);
+    dadosDetalhes.push([`${TERMOS_LOGISTICOS.dses}:`, p.validacaoDSES ? 'SIM' : 'NAO']);
+    dadosDetalhes.push([`${TERMOS_LOGISTICOS.chi}:`, p.validacaoCHI ? 'SIM' : 'NAO']);
+    dadosDetalhes.push([`${TERMOS_LOGISTICOS.comp}:`, p.validacaoComp ? 'SIM' : 'NAO']);
+    dadosDetalhes.push([`${TERMOS_LOGISTICOS.manobras}:`, p.manobras || 'Nenhuma']);
+    dadosDetalhes.push([`${TERMOS_LOGISTICOS.mrr}:`, p.lancamentoMRR || 'Nenhum']);
     
     if (p.ocorrenciasGerais && p.ocorrenciasGerais.length > 0) {
-      dadosDetalhes.push(['--- OCORRÊNCIAS ---']);
+      dadosDetalhes.push([`--- ${TERMOS_LOGISTICOS.ocorrencias.toUpperCase()} ---`]);
       p.ocorrenciasGerais.forEach((oc, i) => {
         dadosDetalhes.push([`${i + 1}. [${oc.prioridade}] ${oc.tipo}`, oc.detalhe]);
       });
@@ -242,7 +243,7 @@ const gerarExcel = (lista) => {
   
   // Salvar arquivo
   const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-  saveAs(new Blob([wbout], { type: 'application/octet-stream' }), `Historico_Operacional_${new Date().getTime()}.xlsx`);
+  saveAs(new Blob([wbout], { type: 'application/octet-stream' }), `Historico_Logistico_${new Date().getTime()}.xlsx`);
 };
 
   const [formData, setFormData] = useState({
@@ -297,16 +298,16 @@ const gerarExcel = (lista) => {
       });
       const textarea = document.getElementById('detalheInput');
       if (textarea) textarea.style.height = '48px';
-      mostrarToast("Ocorrência adicionada");
+      mostrarToast("Ocorrencia adicionada");
     } else {
-      mostrarToast("Preencha título e detalhe", "error");
+      mostrarToast("Preencha codigo e detalhe", "error");
     }
   };
 
   const salvar = async () => {
-    if (formData.utdsSelecionadas.length === 0 || !formData.postoOperacional) { mostrarToast("Preencha as UTDs e o Posto!", "error"); return; }
-    if (configuracoes.mrrObrigatorio && !formData.mrrValidado) { mostrarToast("Validação MRR é obrigatória!", "error"); return; }
-    if (configuracoes.validacaoObrigatoria && !formData.validacaoExec) { mostrarToast("Validação de Execução é obrigatória!", "error"); return; }
+    if (formData.utdsSelecionadas.length === 0 || !formData.postoOperacional) { mostrarToast(`Preencha ${TERMOS_LOGISTICOS.unidadePlural.toLowerCase()} e ${TERMOS_LOGISTICOS.posto.toLowerCase()}!`, "error"); return; }
+    if (configuracoes.mrrObrigatorio && !formData.mrrValidado) { mostrarToast(`${TERMOS_LOGISTICOS.mrr} e obrigatorio!`, "error"); return; }
+    if (configuracoes.validacaoObrigatoria && !formData.validacaoExec) { mostrarToast(`${TERMOS_LOGISTICOS.validacaoExecucao} e obrigatorio!`, "error"); return; }
 
     const agora = new Date();
     const novaPassagem = {
@@ -329,7 +330,7 @@ const gerarExcel = (lista) => {
 
   const limparFormulario = () => {
     setFormData({
-      turno: 'Manhã', utdsSelecionadas: [], utdAtual: '', postoOperacional: '',
+      operador: '', turno: 'Manhã', utdsSelecionadas: [], utdAtual: '', postoOperacional: '',
       data: new Date().toISOString().split('T')[0], validacaoExec: false,
       ocorrenciaTipo: '', ocorrenciaDetalhe: '', ocorrenciaPrioridade: 'Normal',
       ocorrenciasGerais: [], manobras: '', manobrasValidado: false,
@@ -360,7 +361,7 @@ const exportarRelatorioPDF = (passagem) => {
   // Título
   doc.setFontSize(18);
   doc.setFont(undefined, 'bold');
-  doc.text("RELATÓRIO DE OPERAÇÃO", 105, 20, { align: "center" });
+  doc.text(TERMOS_LOGISTICOS.relatorio.toUpperCase(), 105, 20, { align: "center" });
   
   // Informações Gerais
   doc.setFontSize(12);
@@ -368,7 +369,7 @@ const exportarRelatorioPDF = (passagem) => {
   let y = 35;
   doc.text(`Operador: ${passagem.operador || ''}`, 15, y);
   y += 7;
-  doc.text(`Posto: ${passagem.posto || passagem.postoOperacional || ''}`, 15, y);
+  doc.text(`${TERMOS_LOGISTICOS.posto}: ${passagem.posto || passagem.postoOperacional || ''}`, 15, y);
   y += 7;
   doc.text(`Data/Hora: ${passagem.dataHora || ''}`, 15, y);
   y += 7;
@@ -378,16 +379,16 @@ const exportarRelatorioPDF = (passagem) => {
   // Validações
   doc.setFontSize(14);
   doc.setFont(undefined, 'bold');
-  doc.text("Validações", 15, y);
+  doc.text("Checklists", 15, y);
   y += 5;
   
   const validacoes = [
-    ['Validação de Execução', passagem.validacaoExec ? 'SIM' : 'NÃO'],
-    ['DSES', passagem.validacaoDSES ? 'SIM' : 'NÃO'],
-    ['CHI', passagem.validacaoCHI ? 'SIM' : 'NÃO'],
-    ['COMP', passagem.validacaoComp ? 'SIM' : 'NÃO'],
-    ['Manobras', passagem.manobrasValidado ? 'SIM' : 'NÃO'],
-    ['MRR', passagem.mrrValidado ? 'SIM' : 'NÃO']
+    [TERMOS_LOGISTICOS.validacaoExecucao, passagem.validacaoExec ? 'SIM' : 'NAO'],
+    [TERMOS_LOGISTICOS.dses, passagem.validacaoDSES ? 'SIM' : 'NAO'],
+    [TERMOS_LOGISTICOS.chi, passagem.validacaoCHI ? 'SIM' : 'NAO'],
+    [TERMOS_LOGISTICOS.comp, passagem.validacaoComp ? 'SIM' : 'NAO'],
+    [TERMOS_LOGISTICOS.manobras, passagem.manobrasValidado ? 'SIM' : 'NAO'],
+    [TERMOS_LOGISTICOS.mrr, passagem.mrrValidado ? 'SIM' : 'NAO']
   ];
   
   autoTable(doc, {
@@ -407,7 +408,7 @@ const exportarRelatorioPDF = (passagem) => {
   // UTDs
   doc.setFontSize(14);
   doc.setFont(undefined, 'bold');
-  doc.text("UTDs Atendidas", 15, y);
+  doc.text(TERMOS_LOGISTICOS.unidadePlural, 15, y);
   doc.setFontSize(10);
   doc.setFont(undefined, 'normal');
   const utdsText = doc.splitTextToSize(passagem.utdsString || (Array.isArray(passagem.utdsSelecionadas) ? passagem.utdsSelecionadas.join(', ') : 'Nenhuma'), 180);
@@ -424,7 +425,7 @@ const exportarRelatorioPDF = (passagem) => {
     
     doc.setFontSize(14);
     doc.setFont(undefined, 'bold');
-    doc.text("Ocorrências Gerais", 15, y);
+    doc.text(TERMOS_LOGISTICOS.ocorrencias, 15, y);
     
     const ocorrenciasData = passagem.ocorrenciasGerais.map(oc => [
       oc.prioridade,
@@ -457,26 +458,26 @@ const exportarRelatorioPDF = (passagem) => {
   // Observações Técnicas
   doc.setFontSize(14);
   doc.setFont(undefined, 'bold');
-  doc.text("Observações Técnicas", 15, y);
+  doc.text(TERMOS_LOGISTICOS.validacoesTecnicas, 15, y);
   y += 7;
   
   doc.setFontSize(10);
   doc.setFont(undefined, 'bold');
-  doc.text("DSES:", 15, y);
+  doc.text(`${TERMOS_LOGISTICOS.dses}:`, 15, y);
   doc.setFont(undefined, 'normal');
   const dsesText = doc.splitTextToSize(passagem.validacaoDSESTexto || 'Nenhuma', 180);
   doc.text(dsesText, 15, y + 5);
   y += dsesText.length * 5 + 10;
   
   doc.setFont(undefined, 'bold');
-  doc.text("CHI:", 15, y);
+  doc.text(`${TERMOS_LOGISTICOS.chi}:`, 15, y);
   doc.setFont(undefined, 'normal');
   const chiText = doc.splitTextToSize(passagem.validacaoCHITexto || 'Nenhuma', 180);
   doc.text(chiText, 15, y + 5);
   y += chiText.length * 5 + 10;
   
   doc.setFont(undefined, 'bold');
-  doc.text("COMP:", 15, y);
+  doc.text(`${TERMOS_LOGISTICOS.comp}:`, 15, y);
   doc.setFont(undefined, 'normal');
   const compText = doc.splitTextToSize(passagem.validacaoCompTexto || 'Nenhuma', 180);
   doc.text(compText, 15, y + 5);
@@ -491,7 +492,7 @@ const exportarRelatorioPDF = (passagem) => {
   // Manobras
   doc.setFontSize(14);
   doc.setFont(undefined, 'bold');
-  doc.text("Manobras Pendentes", 15, y);
+  doc.text(TERMOS_LOGISTICOS.manobras, 15, y);
   doc.setFontSize(10);
   doc.setFont(undefined, 'normal');
   const manobrasText = doc.splitTextToSize(passagem.manobras || 'Nenhuma', 180);
@@ -501,14 +502,14 @@ const exportarRelatorioPDF = (passagem) => {
   // MRR
   doc.setFontSize(14);
   doc.setFont(undefined, 'bold');
-  doc.text("Lançamentos MRR", 15, y);
+  doc.text(TERMOS_LOGISTICOS.mrrPlural, 15, y);
   doc.setFontSize(10);
   doc.setFont(undefined, 'normal');
   const mrrText = doc.splitTextToSize(passagem.lancamentoMRR || 'Nenhum', 180);
   doc.text(mrrText, 15, y + 7);
   
   // Salvar
-  const nomeArquivo = `Relatorio_Operacao_${passagem.id || Date.now()}.pdf`;
+  const nomeArquivo = `Relatorio_Turno_Logistico_${passagem.id || Date.now()}.pdf`;
   doc.save(nomeArquivo);
 };
   return (
@@ -520,11 +521,13 @@ const exportarRelatorioPDF = (passagem) => {
         <div className="max-w-7xl mx-auto px-4 py-5 flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-4">
             <div className="bg-white rounded-xl shadow-sm flex items-center justify-center overflow-hidden w-[140px] h-[50px]">
-              <img src="/logo.png" alt="Neoenergia Coelba" className="w-full h-full object-contain scale-110" onError={(e) => { e.target.style.display='none'; }} />
+              <div className="w-full h-full flex items-center justify-center text-green-700 font-black text-lg tracking-[0.35em]">
+                TL
+              </div>
             </div>
             <div>
-              <h1 className="text-xl md:text-2xl font-bold tracking-tight">Passagem de Turno</h1>
-              <p className="text-green-100 text-xs font-medium opacity-90 uppercase tracking-widest">Neoenergia Coelba</p>
+              <h1 className="text-xl md:text-2xl font-bold tracking-tight">{BRAND.pageTitle}</h1>
+              <p className="text-green-100 text-xs font-medium opacity-90 uppercase tracking-widest">{BRAND.companyName}</p>
             </div>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
@@ -553,7 +556,7 @@ const exportarRelatorioPDF = (passagem) => {
           {activeView === 'form' ? (
             <div className="bg-white rounded-xl shadow-xl p-6 md:p-8 border-t-8 border-green-600">
   <div className="flex justify-between items-center mb-6 pb-3 border-b-4 border-yellow-400">
-    <h2 className="text-xl font-bold text-green-900 uppercase">Informações Gerais</h2>
+    <h2 className="text-xl font-bold text-green-900 uppercase">Dados do turno</h2>
   </div>
 
   {/* === GRID 1: OPERADOR / TURNO / UTD === */}
@@ -569,56 +572,9 @@ const exportarRelatorioPDF = (passagem) => {
   className="w-full px-4 py-3 border-2 border-green-200 rounded-lg outline-none focus:border-green-500 font-bold"
 >
   <option value="">Selecione o operador...</option>
-
-  <option>JULIANA GOMES COELHO BORGES</option>
-  <option>KALIANE SANTOS DA SILVA</option>
-  <option>KAREN REGINA BRAGA COSTA</option>
-  <option>LAIS GUEDES SOUTO</option>
-  <option>LAMARTINE FREITAS DOS SANTOS CONCEICAO</option>
-  <option>LUCAS ALVES PEREIRA</option>
-  <option>LUCAS SOUZA ROSAS</option>
-  <option>LUCIANO BISPO CONCEICAO</option>
-  <option>LUCIANO MANOEL DE ALELUIA FILHO</option>
-  <option>LUIS ANTONIO FERREIRA SANTOS SILVA</option>
-  <option>LUIS CARLOS JESUS DE OLIVEIRA</option>
-  <option>LUIS CARLOS VIEIRA ALMEIDA</option>
-  <option>LUIS EDUARDO MOURA GONCALVES</option>
-  <option>LUIS FELIPE DOS SANTOS DE SANTA RITA</option>
-  <option>LUIZ FELIPE DE CARVALHO GOMES</option>
-  <option>MARCELO FIGUEIRA FRANCO ARAUJO</option>
-  <option>MARCOS AURELIO DOS SANTOS CERQUEIRA</option>
-  <option>MARLEY SANTANA DOS SANTOS</option>
-  <option>MICHAEL GONCALVES DA SILVA</option>
-  <option>NAIELLE BERTOLDO MACIEL</option>
-  <option>OMAR BONI FUEZI TEIXEIRA</option>
-  <option>OSVALDO JORGE DE OLIVEIRA JUNIOR</option>
-  <option>OTAVIO PINHO DE OLIVEIRA</option>
-  <option>PAULO ALBERTO FARIAS BORGHI</option>
-  <option>PAULO CESAR SANTOS DOS ANJOS</option>
-  <option>PEDRO FERREIRA DE MACEDO NETO</option>
-  <option>PEDRO VICTOR MOTA VIANA</option>
-  <option>RAFAEL ALMEIDA BRAGA</option>
-  <option>RAFAEL ANDRADE DE ALMEIDA</option>
-  <option>RAFAEL CAETANO DOS SANTOS</option>
-  <option>RAILTON CONCEICAO</option>
-  <option>RAYMUNDO DIAS DE FREITAS NETO</option>
-  <option>RODRIGO ALVES BENTIVOGLIO</option>
-  <option>RODRIGO OLIVEIRA DOS SANTOS</option>
-  <option>RUAN LUIS CABRAL GONZAGA</option>
-  <option>SAULO BOMFIM DE SOUZA REIS</option>
-  <option>SILAS CABRAL CERQUEIRA SANTOS</option>
-  <option>THIAGO NEVES MACEDO</option>
-  <option>THIAGO TRABUCO SAMPAIO</option>
-  <option>THOMAS EMILIO PEREIRA REGO</option>
-  <option>VAGNER DOS SANTOS OLIVEIRA</option>
-  <option>VANESSA PIRES LOPO OGANDO</option>
-  <option>VICTOR LUIZ COSTA DE ARAUJO SANTOS</option>
-  <option>VICTORIA LOPES CARVALHO</option>
-  <option>VINICIUS GABRIEL MOTA VIEIRA</option>
-  <option>WELBER CAMPELO DA SILVA</option>
-  <option>WENDEL FERREIRA SOUZA</option>
-  <option>WILBER SILVA SANTOS</option>
-  <option>YURI LIMA SILVA</option>
+  {OPERADORES_GENERICOS.map((operador) => (
+    <option key={operador} value={operador}>{operador}</option>
+  ))}
 
 </select>
     </div>
@@ -639,14 +595,14 @@ const exportarRelatorioPDF = (passagem) => {
 
     {/* ADICIONAR UTD (PERMANECE NA TERCEIRA COLUNA NO DESKTOP) */}
     <div>
-      <label className="block text-sm font-bold text-green-900 mb-2 uppercase">Adicionar UTD *</label>
+      <label className="block text-sm font-bold text-green-900 mb-2 uppercase">Adicionar {TERMOS_LOGISTICOS.unidadeSingular} *</label>
       <div className="flex gap-2">
         <select
           value={formData.utdAtual}
           onChange={(e) => setFormData({ ...formData, utdAtual: e.target.value })}
           className="flex-1 px-4 py-3 border-2 border-green-200 rounded-lg outline-none focus:border-green-500 font-bold"
         >
-          <option value="">Selecione a UTD...</option>
+          <option value="">Selecione a {TERMOS_LOGISTICOS.unidadeSingular.toLowerCase()}...</option>
           {LISTA_UTDS.map((utd) => (
             <option key={utd} value={utd}>{utd}</option>
           ))}
@@ -682,7 +638,7 @@ const exportarRelatorioPDF = (passagem) => {
   {/* === GRID 2: POSTO / DATA / VALIDAÇÃO === */}
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
     <div>
-      <label className="block text-sm font-bold text-green-900 mb-2 uppercase">Posto Operacional *</label>
+      <label className="block text-sm font-bold text-green-900 mb-2 uppercase">{TERMOS_LOGISTICOS.posto} *</label>
       <select
         value={formData.postoOperacional}
         onChange={(e) => setFormData({ ...formData, postoOperacional: e.target.value })}
@@ -714,39 +670,39 @@ const exportarRelatorioPDF = (passagem) => {
           className="w-6 h-6 accent-green-600"
         />
         <span className="font-bold text-green-900 uppercase text-xs">
-          Validação de Execução {configuracoes.validacaoObrigatoria && <span className="text-red-500">*</span>}
+          {TERMOS_LOGISTICOS.validacaoExecucao} {configuracoes.validacaoObrigatoria && <span className="text-red-500">*</span>}
         </span>
       </label>
     </div>
   </div>
 
-              <h3 className="font-black text-green-900 uppercase text-sm mb-4 tracking-tighter">Validações Técnicas</h3>
+              <h3 className="font-black text-green-900 uppercase text-sm mb-4 tracking-tighter">{TERMOS_LOGISTICOS.validacoesTecnicas}</h3>
               <div className="grid md:grid-cols-3 gap-6 mb-8">
                 {[
-                  { label: 'DSES', check: 'validacaoDSES', text: 'validacaoDSESTexto' },
-                  { label: 'CHI', check: 'validacaoCHI', text: 'validacaoCHITexto' },
-                  { label: 'COMP', check: 'validacaoComp', text: 'validacaoCompTexto' }
+                  { label: TERMOS_LOGISTICOS.dses, check: 'validacaoDSES', text: 'validacaoDSESTexto' },
+                  { label: TERMOS_LOGISTICOS.chi, check: 'validacaoCHI', text: 'validacaoCHITexto' },
+                  { label: TERMOS_LOGISTICOS.comp, check: 'validacaoComp', text: 'validacaoCompTexto' }
                 ].map(item => (
                   <div key={item.label} className="bg-slate-50 p-4 rounded-xl border-2 border-slate-300 hover:border-green-300 transition-all">
                     <div className="flex justify-between items-center mb-3">
                       <span className="font-black text-xs text-green-700 uppercase tracking-tighter">{item.label}</span>
                       <input type="checkbox" checked={formData[item.check]} onChange={(e) => setFormData({ ...formData, [item.check]: e.target.checked })} className="w-6 h-6 accent-green-600 cursor-pointer" />
                     </div>
-                    <textarea placeholder={`Observações do ${item.label}...`} value={formData[item.text]} onChange={(e) => setFormData({ ...formData, [item.text]: e.target.value })} className="w-full p-2 text-xs border rounded-lg h-24 resize-none focus:border-green-500 outline-none" />
+                    <textarea placeholder={`Apontamentos de ${item.label}...`} value={formData[item.text]} onChange={(e) => setFormData({ ...formData, [item.text]: e.target.value })} className="w-full p-2 text-xs border rounded-lg h-24 resize-none focus:border-green-500 outline-none" />
                   </div>
                 ))}
               </div>
 
               <div className="mb-8 p-6 bg-slate-50 rounded-xl border-2 border-slate-200">
-                <h3 className="font-black text-green-900 uppercase text-sm mb-4 tracking-tighter">Registro de Ocorrências Gerais</h3>
+                <h3 className="font-black text-green-900 uppercase text-sm mb-4 tracking-tighter">{TERMOS_LOGISTICOS.ocorrencias}</h3>
                 <div className="grid md:grid-cols-4 gap-4 mb-4 items-end">
                   <div className="flex flex-col gap-1">
-                    <label className="text-[10px] font-black uppercase text-slate-400 tracking-tighter">OC</label>
-                    <input type="text" placeholder="Nº OC" value={formData.ocorrenciaTipo} onChange={(e) => setFormData({ ...formData, ocorrenciaTipo: e.target.value })} className="px-4 py-3 border-2 border-slate-200 rounded-lg outline-none focus:border-green-500 font-bold text-sm" />
+                    <label className="text-[10px] font-black uppercase text-slate-400 tracking-tighter">{TERMOS_LOGISTICOS.ocorrenciaCodigo}</label>
+                    <input type="text" placeholder="Codigo do registro" value={formData.ocorrenciaTipo} onChange={(e) => setFormData({ ...formData, ocorrenciaTipo: e.target.value })} className="px-4 py-3 border-2 border-slate-200 rounded-lg outline-none focus:border-green-500 font-bold text-sm" />
                   </div>
                   <div className="md:col-span-2 flex flex-col gap-1">
                     <label className="text-[10px] font-black uppercase text-slate-400 tracking-tighter">Detalhamento</label>
-                    <textarea id="detalheInput" rows="1" placeholder="Descreva a ocorrência..." value={formData.ocorrenciaDetalhe} onInput={autoExpand} onChange={(e) => setFormData({ ...formData, ocorrenciaDetalhe: e.target.value })} className="px-4 py-3 border-2 border-slate-200 rounded-lg outline-none focus:border-green-500 text-sm overflow-hidden min-h-[48px] resize-none leading-relaxed" />
+                    <textarea id="detalheInput" rows="1" placeholder="Descreva a ocorrencia..." value={formData.ocorrenciaDetalhe} onInput={autoExpand} onChange={(e) => setFormData({ ...formData, ocorrenciaDetalhe: e.target.value })} className="px-4 py-3 border-2 border-slate-200 rounded-lg outline-none focus:border-green-500 text-sm overflow-hidden min-h-[48px] resize-none leading-relaxed" />
                   </div>
                   <div className="flex gap-2">
                     <div className="flex-1 flex flex-col gap-1">
@@ -764,14 +720,14 @@ const exportarRelatorioPDF = (passagem) => {
                     <thead className="bg-slate-100 text-slate-500 uppercase text-[10px] font-black tracking-widest">
                       <tr>
                         <th className="px-4 py-2 w-28">Prioridade</th>
-                        <th className="px-4 py-2 w-40">Tipo</th>
+                        <th className="px-4 py-2 w-40">{TERMOS_LOGISTICOS.ocorrenciaCodigo}</th>
                         <th className="px-4 py-2">Detalhe</th>
                         <th className="px-4 py-2 w-12"></th>
                       </tr>
                     </thead>
                     <tbody className="divide-y">
                       {formData.ocorrenciasGerais.length === 0 && (
-                        <tr><td colSpan="4" className="px-4 py-4 text-center text-slate-400 italic">Nenhuma ocorrência na lista</td></tr>
+                        <tr><td colSpan="4" className="px-4 py-4 text-center text-slate-400 italic">Nenhum registro na lista</td></tr>
                       )}
                       {formData.ocorrenciasGerais.map((oc, i) => (
                         <tr key={i} className="hover:bg-green-50">
@@ -789,24 +745,24 @@ const exportarRelatorioPDF = (passagem) => {
               <div className="grid md:grid-cols-2 gap-6 mb-8">
                 <div className="bg-slate-50 p-4 rounded-xl border-2 border-slate-300 hover:border-blue-300 transition-all">
                   <div className="flex justify-between items-center mb-3">
-                    <span className="font-black text-xs text-blue-700 uppercase tracking-tighter">Manobras Pendentes</span>
+                    <span className="font-black text-xs text-blue-700 uppercase tracking-tighter">{TERMOS_LOGISTICOS.manobras}</span>
                     <input type="checkbox" checked={formData.manobrasValidado} onChange={(e) => setFormData({ ...formData, manobrasValidado: e.target.checked })} className="w-6 h-6 accent-blue-600 cursor-pointer" />
                   </div>
-                  <textarea placeholder="Liste as manobras..." value={formData.manobras} onChange={(e) => setFormData({ ...formData, manobras: e.target.value })} className="w-full p-3 text-xs border rounded-lg h-32 resize-none focus:border-blue-500 outline-none bg-white shadow-inner" />
+                  <textarea placeholder="Liste os movimentos pendentes..." value={formData.manobras} onChange={(e) => setFormData({ ...formData, manobras: e.target.value })} className="w-full p-3 text-xs border rounded-lg h-32 resize-none focus:border-blue-500 outline-none bg-white shadow-inner" />
                 </div>
                 <div className="bg-slate-50 p-4 rounded-xl border-2 border-slate-300 hover:border-green-300 transition-all">
                   <div className="flex justify-between items-center mb-3">
                     <span className="font-black text-xs text-green-700 uppercase tracking-tighter">
-                      Lançamento MRR {configuracoes.mrrObrigatorio && <span className="text-red-500">* Obrigatório</span>}
+                      {TERMOS_LOGISTICOS.mrr} {configuracoes.mrrObrigatorio && <span className="text-red-500">* Obrigatorio</span>}
                     </span>
                     <input type="checkbox" checked={formData.mrrValidado} onChange={(e) => setFormData({ ...formData, mrrValidado: e.target.checked })} className="w-6 h-6 accent-green-600 cursor-pointer" />
                   </div>
-                  <textarea placeholder="Informe detalhes do MRR..." value={formData.lancamentoMRR} onChange={(e) => setFormData({ ...formData, lancamentoMRR: e.target.value })} className="w-full p-3 text-xs border rounded-lg h-32 resize-none focus:border-green-500 outline-none bg-white shadow-inner" />
+                  <textarea placeholder="Informe os detalhes da movimentacao..." value={formData.lancamentoMRR} onChange={(e) => setFormData({ ...formData, lancamentoMRR: e.target.value })} className="w-full p-3 text-xs border rounded-lg h-32 resize-none focus:border-green-500 outline-none bg-white shadow-inner" />
                 </div>
               </div>
 
               <div className="flex gap-4 justify-center mt-8">
-                <button onClick={salvar} className="px-8 py-3.5 bg-green-600 text-white rounded-xl hover:bg-green-700 font-bold text-lg shadow-lg flex items-center gap-3 active:scale-95 transition-all"><CheckCircle size={22} /> Salvar Passagem</button>
+                <button onClick={salvar} className="px-8 py-3.5 bg-green-600 text-white rounded-xl hover:bg-green-700 font-bold text-lg shadow-lg flex items-center gap-3 active:scale-95 transition-all"><CheckCircle size={22} /> Salvar turno</button>
                 <button onClick={() => setModalConfirm({ tipo: 'limpar' })} className="px-6 py-3.5 bg-slate-100 text-slate-600 rounded-xl hover:bg-slate-200 font-bold text-lg shadow-md active:scale-95 transition-all">Limpar</button>
               </div>
             </div>
@@ -814,7 +770,7 @@ const exportarRelatorioPDF = (passagem) => {
             /* HISTÓRICO */
             <div className="bg-white rounded-xl shadow-xl p-6 md:p-8">
               <div className="flex justify-between items-center mb-6 pb-3 border-b-4 border-yellow-400">
-                <h2 className="text-xl font-bold text-green-900 uppercase">Histórico Operacional</h2>
+                <h2 className="text-xl font-bold text-green-900 uppercase">{TERMOS_LOGISTICOS.historico}</h2>
         {/* Barra de ações do histórico — versão responsiva e compacta */}
 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
 
@@ -842,10 +798,10 @@ const exportarRelatorioPDF = (passagem) => {
   {/* TEXTO DE VISÃO (agora alinhado à direita e próximo dos botões) */}
   <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider bg-slate-100 px-3 py-1 rounded-full self-end sm:self-center">
     {usuario.visibilidade === 'global'
-      ? 'Visão Global'
+      ? 'Visao Global'
       : usuario.visibilidade === 'posto'
-        ? `Posto: ${usuario.posto}`
-        : 'Só Suas'}
+        ? `${TERMOS_LOGISTICOS.posto}: ${usuario.posto}`
+        : 'So suas'}
   </span>
 
 </div>
@@ -868,10 +824,10 @@ const exportarRelatorioPDF = (passagem) => {
 
   {/* COLUNA 2 — UTD (texto digitável) */}
   <div className="flex flex-col gap-1">
-    <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Buscar UTD</label>
+    <label className="text-[10px] font-black uppercase text-slate-400 ml-1">{TERMOS_LOGISTICOS.unidadeBusca}</label>
     <input
       type="text"
-      placeholder="Ex: ESPLANADA..."
+      placeholder="Ex: ARMAZEM..."
       value={filtroUtd}
       onChange={(e) => setFiltroUtd(e.target.value)}
       className="px-4 py-2 rounded-lg border focus:border-green-500 font-bold text-sm"
@@ -908,9 +864,9 @@ const exportarRelatorioPDF = (passagem) => {
                     <tr>
                       <th className="px-5 py-3 text-left uppercase text-[10px] font-black tracking-widest">Data/Hora</th>
                       <th className="px-5 py-3 text-left uppercase text-[10px] font-black tracking-widest">Operador</th>
-                      <th className="px-5 py-3 text-left uppercase text-[10px] font-black tracking-widest">UTDs</th>
-                      <th className="px-5 py-3 text-left uppercase text-[10px] font-black tracking-widest">OC</th>
-                      <th className="px-5 py-3 text-center uppercase text-[10px] font-black tracking-widest">Relatório</th>
+                      <th className="px-5 py-3 text-left uppercase text-[10px] font-black tracking-widest">{TERMOS_LOGISTICOS.unidadePlural}</th>
+                      <th className="px-5 py-3 text-left uppercase text-[10px] font-black tracking-widest">{TERMOS_LOGISTICOS.ocorrenciaCodigo}</th>
+                      <th className="px-5 py-3 text-center uppercase text-[10px] font-black tracking-widest">Relatorio</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y">
@@ -979,9 +935,9 @@ const exportarRelatorioPDF = (passagem) => {
         <div className="bg-green-700 text-white p-5 rounded-2xl flex justify-between items-center border-b-8 border-yellow-400 mb-6">
           <div className="flex items-center gap-3">
             <div>
-              <h3 className="text-xl font-black uppercase tracking-tighter leading-none">Relatório de Operação</h3>
+              <h3 className="text-xl font-black uppercase tracking-tighter leading-none">{TERMOS_LOGISTICOS.relatorio}</h3>
               <p className="text-xs text-green-100 font-bold mt-1 uppercase tracking-widest">
-                {detalhesPassagem.dataHora} — POSTO: {detalhesPassagem.posto}
+                {detalhesPassagem.dataHora} - {TERMOS_LOGISTICOS.posto.toUpperCase()}: {detalhesPassagem.posto}
               </p>
             </div>
           </div>
@@ -998,11 +954,11 @@ const exportarRelatorioPDF = (passagem) => {
           {/* ÍCONES DSES / CHI / COMP / MANOBRAS / MRR */}
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             {[
-              { label: 'DSES', val: detalhesPassagem.validacaoDSES },
-              { label: 'CHI', val: detalhesPassagem.validacaoCHI },
-              { label: 'COMP', val: detalhesPassagem.validacaoComp },
-              { label: 'Manobras', val: detalhesPassagem.manobrasValidado },
-              { label: 'MRR', val: detalhesPassagem.mrrValidado }
+              { label: TERMOS_LOGISTICOS.dses, val: detalhesPassagem.validacaoDSES },
+              { label: TERMOS_LOGISTICOS.chi, val: detalhesPassagem.validacaoCHI },
+              { label: TERMOS_LOGISTICOS.comp, val: detalhesPassagem.validacaoComp },
+              { label: TERMOS_LOGISTICOS.manobras, val: detalhesPassagem.manobrasValidado },
+              { label: TERMOS_LOGISTICOS.mrr, val: detalhesPassagem.mrrValidado }
             ].map(item => (
               <div key={item.label} className="bg-slate-50 p-3 rounded-2xl border text-center">
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{item.label}</p>
@@ -1013,7 +969,7 @@ const exportarRelatorioPDF = (passagem) => {
 
           {/* UTDs */}
           <div className="bg-slate-50 p-4 rounded-2xl border">
-            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">UTDs Atendidas</h4>
+            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{TERMOS_LOGISTICOS.unidadePlural}</h4>
             <p className="text-xs font-black text-green-800 uppercase tracking-tighter leading-relaxed">
               {detalhesPassagem.utdsString}
             </p>
@@ -1022,7 +978,7 @@ const exportarRelatorioPDF = (passagem) => {
           {/* OCORRÊNCIAS */}
           <div className="bg-white rounded-xl border overflow-hidden">
             <div className="bg-slate-100 px-4 py-2 font-black text-[10px] text-slate-500 uppercase tracking-widest border-b">
-              Lista Detalhada de Ocorrências
+              Detalhes do registro
             </div>
             <table className="w-full text-left text-xs">
               <tbody className="divide-y">
@@ -1056,19 +1012,19 @@ const exportarRelatorioPDF = (passagem) => {
           <div className="grid md:grid-cols-2 gap-5">
             <div>
               <h4 className="text-xs font-black text-slate-800 border-l-4 border-blue-400 pl-3 uppercase tracking-widest mb-2">
-                Manobras Pendentes
+                {TERMOS_LOGISTICOS.manobras}
               </h4>
               <div className="bg-slate-50 p-4 rounded-2xl border min-h-[80px] text-xs text-slate-600 whitespace-pre-wrap leading-relaxed">
-                {detalhesPassagem.manobras || "Nenhuma registrada."}
+                {detalhesPassagem.manobras || "Nenhum movimento registrado."}
               </div>
             </div>
 
             <div>
               <h4 className="text-xs font-black text-slate-800 border-l-4 border-orange-400 pl-3 uppercase tracking-widest mb-2">
-                Lançamentos MRR
+                {TERMOS_LOGISTICOS.mrrPlural}
               </h4>
               <div className="bg-slate-50 p-4 rounded-2xl border min-h-[80px] text-xs text-slate-600 whitespace-pre-wrap leading-relaxed">
-                {detalhesPassagem.lancamentoMRR || "Nenhum registrado."}
+                {detalhesPassagem.lancamentoMRR || "Nenhum registro informado."}
               </div>
             </div>
           </div>
@@ -1114,9 +1070,9 @@ const exportarRelatorioPDF = (passagem) => {
       {modalConfirm && (
         <div className="fixed inset-0 z-[400] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center">
-            <h3 className="text-xl font-black uppercase mb-4 tracking-tighter">{modalConfirm.tipo === 'sair' ? 'Sair do Sistema?' : 'Limpar Formulário?'}</h3>
+            <h3 className="text-xl font-black uppercase mb-4 tracking-tighter">{modalConfirm.tipo === 'sair' ? 'Sair do sistema?' : 'Limpar registro?'}</h3>
             <div className="flex gap-3">
-              <button onClick={() => setModalConfirm(null)} className="flex-1 py-3 bg-slate-100 font-bold rounded-xl uppercase text-xs tracking-widest">Não</button>
+              <button onClick={() => setModalConfirm(null)} className="flex-1 py-3 bg-slate-100 font-bold rounded-xl uppercase text-xs tracking-widest">Nao</button>
               <button onClick={() => { if (modalConfirm.tipo === 'sair') onLogout(); else limparFormulario(); setModalConfirm(null); }} className="flex-1 py-3 bg-red-600 text-white font-bold rounded-xl uppercase text-xs tracking-widest shadow-lg">Confirmar</button>
             </div>
           </div>
@@ -1149,7 +1105,7 @@ const App = ({ usuario: usuarioProp, onLogout: onLogoutProp }) => {
   const usuarioAdmin = {
     id: 'admin_master',
     matricula: 'admin',
-    nome: 'Administrador Master',
+    nome: 'Administrador Logistico',
     papel: 'admin',
     ativo: true,
     posto: null,

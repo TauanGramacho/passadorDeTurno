@@ -1,16 +1,69 @@
-// src/constants/index.js
-export const LISTA_UTDS = [
-  "ALAGOINHAS", "ESPLANADA", "PAULO AFONSO", "RIBEIRA DO POMBAL", "JACOBINA",
-  "JUAZEIRO", "REMANSO", "SENHOR DO BONFIM", "CONCEICAO DO COITE", "FEIRA DE SANTANA NORTE",
-  "FEIRA DE SANTANA SUL", "SANTO AMARO", "SERRINHA", "CAMACARI", "CANDEIAS",
-  "LAURO DE FREITAS", "GRACA", "ITAPOAN", "PERIPERI", "PIRAJA", "PITUBA",
-  "AMARGOSA", "IPIAU", "SANTO ANTONIO DE JESUS", "VALENCA", "EUNAPOLIS",
-  "ILHEUS", "ITABUNA", "PORTO SEGURO", "POSTO DA MATA", "TEIXEIRA DE FREITAS",
-  "BRUMADO", "GUANAMBI", "ITAPETINGA", "VITORIA DA CONQUISTA", "IRECE",
-  "ITABERABA", "JEQUIE", "LIVRAMENTO DE NOSSA SENHORA", "SEABRA", "BARREIRAS",
-  "BOM JESUS DA LAPA", "IBOTIRAMA", "LUIS EDUARDO MAGALHAES", "SANTA MARIA DA VITORIA"
-];
+export const BRAND = {
+  appName: "TurnoLog",
+  companyName: "Centro Logistico Atlas",
+  pageTitle: "Passagem de Turno",
+  pageSubtitle: "Operacao logistica em andamento"
+};
 
 export const POSTOS_OPERACIONAIS = [
-  "Feira de Santana", "Serrinha", "Alagoinhas", "Jacobina", "Juazeiro"
+  "Barcelona",
+  "Dubai",
+  "Lisboa",
+  "Quioto",
+  "Vancouver"
 ];
+
+export const LISTA_AREAS = [
+  "ARMAZEM ALFA",
+  "ARMAZEM BRAVO",
+  "ARMAZEM CHARLIE",
+  "ARMAZEM DELTA",
+  "DOCA NORTE 01",
+  "DOCA NORTE 02",
+  "DOCA SUL 01",
+  "DOCA SUL 02",
+  "PATIO LESTE",
+  "PATIO OESTE",
+  "ROTA EXPRESSA",
+  "ROTA INTERMODAL",
+  "CORREDOR FRIO",
+  "CORREDOR SECO",
+  "TORRE DE EXPEDICAO",
+  "TORRE DE RECEBIMENTO",
+  "AREA DE CROSS DOCKING",
+  "AREA DE CONSOLIDACAO",
+  "AREA DE TRIAGEM",
+  "CENTRO DE INVENTARIO"
+];
+
+export const OPERADORES_GENERICOS = [
+  "ALANA MOREIRA CAMPOS",
+  "BRUNO MATOS FERREIRA",
+  "CLARA VIEIRA MORAES",
+  "DANIEL REZENDE SOUZA",
+  "ELISA NUNES BARROS",
+  "FABIO CORREIA LIMA",
+  "GIOVANA MELO CARDOSO",
+  "HEITOR PINHEIRO ALVES",
+  "ISADORA LEMOS PEREIRA",
+  "JOAO TAVARES ROCHA"
+];
+
+export const TERMOS_LOGISTICOS = {
+  unidadeSingular: "Area operacional",
+  unidadePlural: "Areas operacionais",
+  unidadeBusca: "Buscar area",
+  posto: "Hub logistico",
+  validacaoExecucao: "Checklist de operacao",
+  validacoesTecnicas: "Checklists tecnicos",
+  dses: "DOCA",
+  chi: "FROTA",
+  comp: "CARGA",
+  mrr: "Registro de movimentacao",
+  mrrPlural: "Registros de movimentacao",
+  manobras: "Movimentos pendentes",
+  ocorrencias: "Registro de ocorrencias",
+  ocorrenciaCodigo: "Codigo",
+  relatorio: "Relatorio de turno logistico",
+  historico: "Historico logistico"
+};
