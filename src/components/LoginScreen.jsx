@@ -57,9 +57,9 @@ const CabecalhoAtlas = () => (
       </div>
 
       <div>
-        <h1 className="text-xl font-bold tracking-tight">{BRAND.companyName}</h1>
-        <p className="mt-1 text-xs font-semibold uppercase tracking-[0.34em] text-amber-100/85">
-          {BRAND.pageTitle}
+        <h1 className="text-xl font-bold tracking-tight">Turno Log</h1>
+        <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-amber-100/82">
+          {BRAND.pageSubtitle}
         </p>
       </div>
 

@@ -526,7 +526,7 @@ const exportarRelatorioPDF = (passagem) => {
             </div>
             <div>
               <h1 className="text-xl md:text-2xl font-bold tracking-tight">{BRAND.pageTitle}</h1>
-              <p className="text-stone-200 text-xs font-medium opacity-90 uppercase tracking-widest">{BRAND.companyName}</p>
+              <p className="text-stone-200 text-[11px] font-medium opacity-90 uppercase tracking-[0.28em]">{BRAND.pageSubtitle}</p>
             </div>
           </div>
           <div className="flex items-center gap-2 flex-wrap">

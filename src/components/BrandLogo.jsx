@@ -77,7 +77,7 @@ const BrandLogo = ({ tone = 'dark', size = 'md', showWordmark = true, className 
             {BRAND.appName}
           </span>
           <span className={`mt-1 uppercase tracking-[0.32em] ${palette.subtitle} ${subtitleClass}`}>
-            logistics handoff
+            {BRAND.wordmarkSubtitle}
           </span>
         </div>
       )}

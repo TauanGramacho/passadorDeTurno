@@ -1,8 +1,8 @@
 export const BRAND = {
   appName: "TurnoLog",
-  companyName: "Centro Logistico Atlas",
-  pageTitle: "Passagem de Turno",
-  pageSubtitle: "Operacao logistica em andamento"
+  pageTitle: "Sistema de Turno Logistico",
+  pageSubtitle: "Operacao centralizada",
+  wordmarkSubtitle: "One Place"
 };
 
 export const POSTOS_OPERACIONAIS = [
