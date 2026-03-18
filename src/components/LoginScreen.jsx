@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Lock, User, Eye, EyeOff, ArrowLeft, UserPlus, MapPin } from 'lucide-react';
 import { api } from '../api/client';
 import { BRAND, POSTOS_OPERACIONAIS } from '../constants';
+import BrandLogo from './BrandLogo';
 
 const CampoTexto = ({
   icone: Icone,
@@ -15,13 +16,13 @@ const CampoTexto = ({
 }) => (
   <div className="group">
     {label && (
-      <label className="text-xs font-semibold text-gray-400 uppercase ml-1 mb-2 block transition-colors group-focus-within:text-green-600">
+      <label className="text-xs font-semibold text-stone-400 uppercase ml-1 mb-2 block transition-colors group-focus-within:text-amber-600">
         {label}
       </label>
     )}
     <div className="relative flex items-center">
       {Icone && (
-        <div className="absolute left-4 text-gray-300 pointer-events-none group-focus-within:text-green-500 transition-colors">
+        <div className="absolute left-4 text-stone-300 pointer-events-none group-focus-within:text-amber-500 transition-colors">
           <Icone size={18} />
         </div>
       )}
@@ -30,7 +31,7 @@ const CampoTexto = ({
         value={value}
         onChange={onChange}
         placeholder={placeholder}
-        className="w-full pl-12 pr-4 py-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-green-500/10 focus:border-green-500 focus:bg-white outline-none transition-all placeholder:text-gray-300 text-gray-600"
+        className="w-full pl-12 pr-4 py-3 bg-stone-50/80 border border-stone-200 rounded-xl focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 focus:bg-white outline-none transition-all placeholder:text-stone-300 text-stone-700"
       />
       {extras && <div className="absolute right-4">{extras}</div>}
     </div>
@@ -42,30 +43,36 @@ const CampoTexto = ({
 
 const ErroBox = ({ mensagem }) =>
   mensagem ? (
-    <div className="bg-orange-50 text-orange-700 p-3 rounded-lg text-xs text-center font-medium border border-orange-100">
+    <div className="bg-amber-50 text-amber-800 p-3 rounded-lg text-xs text-center font-medium border border-amber-200">
       {mensagem}
     </div>
   ) : null;
 
-const CabecalhoTricolor = () => (
-  <div className="bg-gradient-to-r from-slate-700 via-green-600 to-orange-400 p-8 text-white text-center">
-    <div className="w-24 h-24 bg-white rounded-full mx-auto mb-4 flex items-center justify-center shadow-lg overflow-hidden">
-      <div className="w-16 h-16 rounded-full border-4 border-green-600 flex items-center justify-center text-green-700 font-black text-xl tracking-widest">
-        TL
+const CabecalhoAtlas = () => (
+  <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-stone-800 to-amber-700 p-7 text-white text-center">
+    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(251,191,36,0.14),_transparent_32%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.10),_transparent_26%)]" />
+    <div className="relative flex flex-col items-center gap-4">
+      <div className="rounded-[1.7rem] border border-white/10 bg-white/10 px-4 py-3 shadow-xl backdrop-blur-sm">
+        <BrandLogo tone="dark" size="md" showWordmark={false} />
       </div>
+
+      <div>
+        <h1 className="text-xl font-bold tracking-tight">{BRAND.companyName}</h1>
+        <p className="mt-1 text-xs font-semibold uppercase tracking-[0.34em] text-amber-100/85">
+          {BRAND.pageTitle}
+        </p>
+      </div>
+
+      <p className="max-w-xs text-[10px] leading-relaxed text-stone-200/76">
+        Registros de turno, hubs e areas operacionais em um fluxo mais claro e profissional.
+      </p>
     </div>
-
-    <h1 className="text-xl font-bold tracking-tight">{BRAND.companyName}</h1>
-
-    <p className="text-white/80 text-xs font-light mt-1 uppercase tracking-widest">
-      {BRAND.pageTitle}
-    </p>
   </div>
 );
 
 const Rodape = () => (
-  <div className="pt-4 text-center border-t border-gray-50">
-    <p className="text-[10px] text-gray-400 font-medium uppercase tracking-tighter">
+  <div className="pt-4 text-center border-t border-stone-100">
+    <p className="text-[10px] text-stone-400 font-medium uppercase tracking-tighter">
       @ 2026 {BRAND.appName}
     </p>
   </div>
@@ -107,9 +114,9 @@ const LoginView = ({ onLogin, onCadastrar }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-slate-200 to-orange-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-gray-100">
-        <CabecalhoTricolor />
+    <div className="min-h-screen bg-gradient-to-br from-stone-100 via-white to-amber-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-md overflow-hidden rounded-[1.75rem] border border-stone-200 bg-white shadow-xl shadow-stone-300/40">
+        <CabecalhoAtlas />
 
         <form onSubmit={handleLogin} className="p-10 space-y-5">
           <CampoTexto
@@ -138,7 +145,7 @@ const LoginView = ({ onLogin, onCadastrar }) => {
               <button
                 type="button"
                 onClick={() => setMostrarSenha(!mostrarSenha)}
-                className="text-gray-300 hover:text-green-500 transition-colors"
+                className="text-stone-300 hover:text-amber-500 transition-colors"
               >
                 {mostrarSenha ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
@@ -149,17 +156,17 @@ const LoginView = ({ onLogin, onCadastrar }) => {
 
           <button
             type="submit"
-            className="w-full bg-green-600 hover:bg-green-700 text-white py-3.5 rounded-xl font-semibold text-sm shadow-md shadow-green-200 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 py-3.5 text-sm font-semibold text-white shadow-md shadow-slate-300 transition-all active:scale-[0.98] hover:bg-stone-900"
           >
             <Lock size={16} /> Entrar
           </button>
 
           <div className="relative py-4">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-100" />
+              <div className="w-full border-t border-stone-100" />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="bg-white px-3 text-gray-400 font-semibold uppercase tracking-widest">
+              <span className="bg-white px-3 text-stone-400 font-semibold uppercase tracking-widest">
                 Ou
               </span>
             </div>
@@ -168,7 +175,7 @@ const LoginView = ({ onLogin, onCadastrar }) => {
           <button
             type="button"
             onClick={onCadastrar}
-            className="w-full border-2 border-slate-200 hover:border-green-500 hover:bg-green-50/50 text-slate-700 hover:text-green-700 py-3.5 rounded-xl font-semibold text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+            className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-stone-200 py-3.5 text-sm font-semibold text-stone-700 transition-all active:scale-[0.98] hover:border-amber-500 hover:bg-amber-50/70 hover:text-amber-700"
           >
             <UserPlus size={16} /> Novo Usuario
           </button>
@@ -235,12 +242,12 @@ const CadastroView = ({ onVoltar }) => {
 
   if (sucesso) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-100 via-slate-200 to-orange-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-gray-100">
-          <CabecalhoTricolor />
+      <div className="min-h-screen bg-gradient-to-br from-stone-100 via-white to-amber-50 flex items-center justify-center p-4">
+        <div className="w-full max-w-md overflow-hidden rounded-[1.75rem] border border-stone-200 bg-white shadow-xl shadow-stone-300/40">
+          <CabecalhoAtlas />
           <div className="p-10 text-center space-y-6">
-            <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto border-4 border-green-200">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border-4 border-amber-200 bg-amber-50">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#b45309" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                 <polyline points="22 4 12 14.01 9 11.01" />
               </svg>
@@ -250,16 +257,16 @@ const CadastroView = ({ onVoltar }) => {
               <h2 className="text-lg font-bold text-slate-800 mb-1">Cadastro Concluido!</h2>
               <p className="text-xs text-slate-500 leading-relaxed">
                 Sua conta foi criada com sucesso. Voce pode se autenticar agora com a matricula{' '}
-                <span className="font-black text-green-700">
+                <span className="font-black text-amber-700">
                   {dados.matricula.trim().toLowerCase()}
                 </span>.
               </p>
             </div>
 
-            <div className="bg-slate-50 rounded-xl border p-4 text-left space-y-2">
+            <div className="rounded-xl border border-stone-200 bg-stone-50 p-4 text-left space-y-2">
               <div className="flex justify-between text-xs">
                 <span className="text-slate-400 font-semibold uppercase tracking-wider">Papel</span>
-                <span className="font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">Controlador</span>
+                <span className="rounded-full bg-slate-900 px-2 py-0.5 font-black text-amber-300">Controlador</span>
               </div>
               <div className="flex justify-between text-xs">
                 <span className="text-slate-400 font-semibold uppercase tracking-wider">Hub</span>
@@ -267,7 +274,7 @@ const CadastroView = ({ onVoltar }) => {
               </div>
               <div className="flex justify-between text-xs">
                 <span className="text-slate-400 font-semibold uppercase tracking-wider">Visibilidade</span>
-                <span className="font-bold text-green-600">Todos os registros</span>
+                <span className="font-bold text-amber-700">Todos os registros</span>
               </div>
             </div>
 
@@ -277,7 +284,7 @@ const CadastroView = ({ onVoltar }) => {
 
             <button
               onClick={onVoltar}
-              className="w-full bg-slate-800 hover:bg-slate-900 text-white py-3.5 rounded-xl font-semibold text-sm shadow-md shadow-slate-200 transition-all active:scale-[0.98]"
+              className="w-full rounded-xl bg-slate-950 py-3.5 text-sm font-semibold text-white shadow-md shadow-slate-300 transition-all active:scale-[0.98] hover:bg-stone-900"
             >
               Ir para Login
             </button>
@@ -290,19 +297,19 @@ const CadastroView = ({ onVoltar }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-slate-200 to-orange-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-gray-100">
-        <CabecalhoTricolor />
+    <div className="min-h-screen bg-gradient-to-br from-stone-100 via-white to-amber-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-md overflow-hidden rounded-[1.75rem] border border-stone-200 bg-white shadow-xl shadow-stone-300/40">
+        <CabecalhoAtlas />
 
         <form onSubmit={handleCadastro} className="p-10 space-y-5">
-          <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+          <div className="flex items-center justify-between border-b border-stone-100 pb-3">
             <h2 className="text-sm font-black text-slate-700 uppercase tracking-tighter flex items-center gap-2">
-              <UserPlus size={16} className="text-green-600" /> Criar Conta
+              <UserPlus size={16} className="text-amber-600" /> Criar Conta
             </h2>
             <button
               type="button"
               onClick={onVoltar}
-              className="text-xs text-slate-400 hover:text-green-600 flex items-center gap-1 transition-colors font-semibold"
+              className="flex items-center gap-1 text-xs font-semibold text-slate-400 transition-colors hover:text-amber-600"
             >
               <ArrowLeft size={12} /> Voltar
             </button>
@@ -357,7 +364,7 @@ const CadastroView = ({ onVoltar }) => {
               <button
                 type="button"
                 onClick={() => setMostrarSenha(!mostrarSenha)}
-                className="text-gray-300 hover:text-green-500 transition-colors"
+                className="text-stone-300 hover:text-amber-500 transition-colors"
               >
                 {mostrarSenha ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
@@ -374,17 +381,17 @@ const CadastroView = ({ onVoltar }) => {
           />
 
           <div className="group">
-            <label className="text-xs font-semibold text-gray-400 uppercase ml-1 mb-2 block transition-colors group-focus-within:text-green-600">
+            <label className="text-xs font-semibold text-stone-400 uppercase ml-1 mb-2 block transition-colors group-focus-within:text-amber-600">
               Hub Logistico *
             </label>
             <div className="relative flex items-center">
-              <div className="absolute left-4 text-gray-300 pointer-events-none group-focus-within:text-green-500 transition-colors">
+              <div className="absolute left-4 text-stone-300 pointer-events-none group-focus-within:text-amber-500 transition-colors">
                 <MapPin size={18} />
               </div>
               <select
                 value={dados.posto}
                 onChange={(e) => setDados({ ...dados, posto: e.target.value })}
-                className="w-full pl-12 pr-4 py-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-green-500/10 focus:border-green-500 focus:bg-white outline-none transition-all text-gray-600 appearance-none cursor-pointer"
+                className="w-full appearance-none cursor-pointer rounded-xl border border-stone-200 bg-stone-50/80 py-3 pl-12 pr-4 text-stone-700 transition-all outline-none focus:border-amber-500 focus:bg-white focus:ring-4 focus:ring-amber-500/10"
               >
                 <option value="" disabled>Selecione seu hub...</option>
                 {POSTOS_OPERACIONAIS.map((p) => (
@@ -398,13 +405,13 @@ const CadastroView = ({ onVoltar }) => {
 
           <button
             type="submit"
-            className="w-full bg-green-600 hover:bg-green-700 text-white py-3.5 rounded-xl font-semibold text-sm shadow-md shadow-green-200 transition-all active:scale-[0.98] mt-2 flex items-center justify-center gap-2"
+            className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 py-3.5 text-sm font-semibold text-white shadow-md shadow-slate-300 transition-all active:scale-[0.98] hover:bg-stone-900"
           >
             <UserPlus size={16} /> Criar Minha Conta
           </button>
 
           <p className="text-[9px] text-center text-slate-400 leading-relaxed">
-            Contas criadas aqui sao do tipo <span className="font-black text-blue-500">Controlador</span> com acesso a <span className="font-black text-green-600">todos os registros</span>.
+            Contas criadas aqui sao do tipo <span className="font-black text-slate-700">Controlador</span> com acesso a <span className="font-black text-amber-700">todos os registros</span>.
             Para obter acesso como administrador, solicite ao responsavel pelo sistema.
           </p>
 

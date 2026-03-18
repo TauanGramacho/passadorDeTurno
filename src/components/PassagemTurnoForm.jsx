@@ -5,6 +5,7 @@ import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import AdminScreen from './AdminScreen';
+import BrandLogo from './BrandLogo';
 import { api } from '../api/client';
 import { BRAND, LISTA_AREAS, OPERADORES_GENERICOS, POSTOS_OPERACIONAIS, TERMOS_LOGISTICOS } from '../constants';
 
@@ -28,8 +29,8 @@ const Toast = ({ notificacao }) => {
   if (!notificacao) return null;
   return (
     <div className="fixed top-5 right-5 z-[500] animate-bounce">
-      <div className={`px-6 py-4 rounded-2xl shadow-2xl border-l-8 flex items-center gap-3 bg-white ${notificacao.tipo === 'success' ? 'border-green-500 text-green-800' : notificacao.tipo === 'error' ? 'border-red-500 text-red-800' : 'border-blue-500 text-blue-800'}`}>
-        {notificacao.tipo === 'success' ? <CheckCircle className="text-green-500" /> : notificacao.tipo === 'error' ? <AlertTriangle className="text-red-500" /> : <AlertTriangle className="text-blue-500" />}
+      <div className={`px-6 py-4 rounded-2xl shadow-2xl border-l-8 flex items-center gap-3 bg-white ${notificacao.tipo === 'success' ? 'border-amber-500 text-amber-800' : notificacao.tipo === 'error' ? 'border-red-500 text-red-800' : 'border-slate-500 text-slate-800'}`}>
+        {notificacao.tipo === 'success' ? <CheckCircle className="text-amber-500" /> : notificacao.tipo === 'error' ? <AlertTriangle className="text-red-500" /> : <AlertTriangle className="text-slate-500" />}
         <span className="font-bold uppercase text-xs tracking-wider">{notificacao.mensagem}</span>
       </div>
     </div>
@@ -166,7 +167,7 @@ const gerarPDF = (lista) => {
     body: dadosTabela,
     theme: 'grid',
     headStyles: { 
-      fillColor: [22, 163, 74],
+      fillColor: [17, 24, 39],
       fontSize: 8,
       fontStyle: 'bold'
     },
@@ -344,7 +345,7 @@ const gerarExcel = (lista) => {
 
   const autoExpand = (e) => { e.target.style.height = 'inherit'; e.target.style.height = `${e.target.scrollHeight}px`; };
 
-  const StatusIcon = ({ checked }) => checked ? <CheckCircle size={18} className="text-green-500" strokeWidth={3} /> : <XCircle size={18} className="text-red-500" strokeWidth={3} />;
+  const StatusIcon = ({ checked }) => checked ? <CheckCircle size={18} className="text-amber-500" strokeWidth={3} /> : <XCircle size={18} className="text-red-500" strokeWidth={3} />;
 // Normaliza strings para comparação (remove acentos, caixa e espaços)
 const norm = (s) =>
   (s ?? "")
@@ -396,7 +397,7 @@ const exportarRelatorioPDF = (passagem) => {
     head: [['Item', 'Status']],
     body: validacoes,
     theme: 'grid',
-    headStyles: { fillColor: [22, 163, 74] },
+    headStyles: { fillColor: [17, 24, 39] },
     columnStyles: {
       0: { cellWidth: 80 },
       1: { cellWidth: 40, halign: 'center', fontStyle: 'bold' }
@@ -438,7 +439,7 @@ const exportarRelatorioPDF = (passagem) => {
       head: [['Prioridade', 'Tipo', 'Detalhe']],
       body: ocorrenciasData,
       theme: 'striped',
-      headStyles: { fillColor: [59, 130, 246] },
+      headStyles: { fillColor: [180, 83, 9] },
       columnStyles: {
         0: { cellWidth: 30 },
         1: { cellWidth: 40 },
@@ -513,32 +514,30 @@ const exportarRelatorioPDF = (passagem) => {
   doc.save(nomeArquivo);
 };
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-stone-100 via-amber-50 to-white">
       <Toast notificacao={notificacao} />
 
       {/* Header */}
-      <header className="bg-gradient-to-r from-green-600 to-green-500 text-white shadow-lg">
+      <header className="bg-gradient-to-r from-slate-950 via-stone-900 to-amber-700 text-white shadow-lg">
         <div className="max-w-7xl mx-auto px-4 py-5 flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-4">
-            <div className="bg-white rounded-xl shadow-sm flex items-center justify-center overflow-hidden w-[140px] h-[50px]">
-              <div className="w-full h-full flex items-center justify-center text-green-700 font-black text-lg tracking-[0.35em]">
-                TL
-              </div>
+            <div className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 shadow-lg backdrop-blur-sm">
+              <BrandLogo tone="dark" size="sm" />
             </div>
             <div>
               <h1 className="text-xl md:text-2xl font-bold tracking-tight">{BRAND.pageTitle}</h1>
-              <p className="text-green-100 text-xs font-medium opacity-90 uppercase tracking-widest">{BRAND.companyName}</p>
+              <p className="text-stone-200 text-xs font-medium opacity-90 uppercase tracking-widest">{BRAND.companyName}</p>
             </div>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
-            <button onClick={() => setActiveView('form')} className={`px-4 py-2 rounded-lg font-semibold text-xs flex items-center gap-2 transition-all ${activeView === 'form' ? 'bg-yellow-400 text-green-900 shadow-lg scale-105' : 'bg-green-700 hover:bg-green-600'}`}><Plus size={16} /> Nova</button>
-            <button onClick={() => setActiveView('history')} className={`px-4 py-2 rounded-lg font-semibold text-xs flex items-center gap-2 transition-all ${activeView === 'history' ? 'bg-yellow-400 text-green-900 shadow-lg scale-105' : 'bg-green-700 hover:bg-green-600'}`}><Eye size={16} /> Histórico</button>
+            <button onClick={() => setActiveView('form')} className={`px-4 py-2 rounded-lg font-semibold text-xs flex items-center gap-2 transition-all ${activeView === 'form' ? 'bg-amber-200 text-slate-950 shadow-lg scale-105' : 'bg-white/10 hover:bg-white/15 border border-white/10'}`}><Plus size={16} /> Nova</button>
+            <button onClick={() => setActiveView('history')} className={`px-4 py-2 rounded-lg font-semibold text-xs flex items-center gap-2 transition-all ${activeView === 'history' ? 'bg-amber-200 text-slate-950 shadow-lg scale-105' : 'bg-white/10 hover:bg-white/15 border border-white/10'}`}><Eye size={16} /> Histórico</button>
             {usuario.papel === 'admin' && (
-              <button onClick={() => setActiveView('admin')} className="px-4 py-2 bg-yellow-400 hover:bg-yellow-300 text-slate-800 rounded-lg font-black text-xs flex items-center gap-2 shadow-md tracking-wider uppercase">
+              <button onClick={() => setActiveView('admin')} className="px-4 py-2 bg-amber-200 hover:bg-amber-300 text-slate-950 rounded-lg font-black text-xs flex items-center gap-2 shadow-md tracking-wider uppercase">
                 <Crown size={14} /> Admin
               </button>
             )}
-            <button onClick={() => setModalConfirm({ tipo: 'sair' })} className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold text-xs flex items-center gap-2 shadow-md">
+            <button onClick={() => setModalConfirm({ tipo: 'sair' })} className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-semibold text-xs flex items-center gap-2 shadow-md border border-white/10">
               <LogOut size={16} /> <span className="hidden sm:inline">{usuario.nome}</span><span className="sm:hidden">Sair</span>
             </button>
           </div>
@@ -554,9 +553,9 @@ const exportarRelatorioPDF = (passagem) => {
       {activeView !== 'admin' && (
         <main className="max-w-7xl mx-auto px-4 py-8">
           {activeView === 'form' ? (
-            <div className="bg-white rounded-xl shadow-xl p-6 md:p-8 border-t-8 border-green-600">
-  <div className="flex justify-between items-center mb-6 pb-3 border-b-4 border-yellow-400">
-    <h2 className="text-xl font-bold text-green-900 uppercase">Dados do turno</h2>
+            <div className="bg-white rounded-xl shadow-xl p-6 md:p-8 border-t-8 border-amber-500">
+  <div className="flex justify-between items-center mb-6 pb-3 border-b-4 border-amber-300">
+    <h2 className="text-xl font-bold text-slate-900 uppercase">Dados do turno</h2>
   </div>
 
   {/* === GRID 1: OPERADOR / TURNO / UTD === */}
@@ -565,11 +564,11 @@ const exportarRelatorioPDF = (passagem) => {
     {/* OPERADOR (AGORA ITEM INDEPENDENTE) */}
     <div>
       {/* Operador */}
-      <label className="block text-sm font-bold text-green-900 mb-2 uppercase">Operador</label>
+      <label className="block text-sm font-bold text-slate-900 mb-2 uppercase">Operador</label>
       <select
   value={formData.operador}
   onChange={(e) => setFormData({ ...formData, operador: e.target.value })}
-  className="w-full px-4 py-3 border-2 border-green-200 rounded-lg outline-none focus:border-green-500 font-bold"
+  className="w-full px-4 py-3 border-2 border-stone-200 rounded-lg outline-none focus:border-amber-500 font-bold"
 >
   <option value="">Selecione o operador...</option>
   {OPERADORES_GENERICOS.map((operador) => (
@@ -581,11 +580,11 @@ const exportarRelatorioPDF = (passagem) => {
 
     {/* TURNO (AGORA ITEM INDEPENDENTE) */}
     <div>
-      <label className="block text-sm font-bold text-green-900 mb-2 uppercase">Turno</label>
+      <label className="block text-sm font-bold text-slate-900 mb-2 uppercase">Turno</label>
       <select
         value={formData.turno}
         onChange={(e) => setFormData({ ...formData, turno: e.target.value })}
-        className="w-full px-4 py-3 border-2 border-green-200 rounded-lg outline-none focus:border-green-500 font-bold"
+        className="w-full px-4 py-3 border-2 border-stone-200 rounded-lg outline-none focus:border-amber-500 font-bold"
       >
         <option>Manhã</option>
         <option>Tarde</option>
@@ -595,12 +594,12 @@ const exportarRelatorioPDF = (passagem) => {
 
     {/* ADICIONAR UTD (PERMANECE NA TERCEIRA COLUNA NO DESKTOP) */}
     <div>
-      <label className="block text-sm font-bold text-green-900 mb-2 uppercase">Adicionar {TERMOS_LOGISTICOS.unidadeSingular} *</label>
+      <label className="block text-sm font-bold text-slate-900 mb-2 uppercase">Adicionar {TERMOS_LOGISTICOS.unidadeSingular} *</label>
       <div className="flex gap-2">
         <select
           value={formData.utdAtual}
           onChange={(e) => setFormData({ ...formData, utdAtual: e.target.value })}
-          className="flex-1 px-4 py-3 border-2 border-green-200 rounded-lg outline-none focus:border-green-500 font-bold"
+          className="flex-1 px-4 py-3 border-2 border-stone-200 rounded-lg outline-none focus:border-amber-500 font-bold"
         >
           <option value="">Selecione a {TERMOS_LOGISTICOS.unidadeSingular.toLowerCase()}...</option>
           {LISTA_UTDS.map((utd) => (
@@ -609,7 +608,7 @@ const exportarRelatorioPDF = (passagem) => {
         </select>
         <button
           onClick={adicionarUTD}
-          className="px-5 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700"
+          className="px-5 py-3 bg-slate-900 text-white rounded-lg hover:bg-slate-800"
         >
           <Plus size={20} />
         </button>
@@ -618,16 +617,16 @@ const exportarRelatorioPDF = (passagem) => {
   </div>
 
   {formData.utdsSelecionadas.length > 0 && (
-    <div className="mb-6 p-4 bg-green-50 rounded-lg border-2 border-green-200 flex flex-wrap gap-2">
+    <div className="mb-6 p-4 bg-stone-50 rounded-lg border-2 border-stone-200 flex flex-wrap gap-2">
       {formData.utdsSelecionadas.map((utd) => (
         <span
           key={utd}
-          className="inline-flex items-center gap-2 px-3 py-1 bg-green-600 text-white rounded-full text-sm font-bold shadow-sm"
+          className="inline-flex items-center gap-2 px-3 py-1 bg-slate-900 text-white rounded-full text-sm font-bold shadow-sm"
         >
           {utd}
           <X
             size={16}
-            className="cursor-pointer hover:text-yellow-300"
+            className="cursor-pointer hover:text-amber-200"
             onClick={() => removerUTD(utd)}
           />
         </span>
@@ -638,11 +637,11 @@ const exportarRelatorioPDF = (passagem) => {
   {/* === GRID 2: POSTO / DATA / VALIDAÇÃO === */}
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
     <div>
-      <label className="block text-sm font-bold text-green-900 mb-2 uppercase">{TERMOS_LOGISTICOS.posto} *</label>
+      <label className="block text-sm font-bold text-slate-900 mb-2 uppercase">{TERMOS_LOGISTICOS.posto} *</label>
       <select
         value={formData.postoOperacional}
         onChange={(e) => setFormData({ ...formData, postoOperacional: e.target.value })}
-        className="w-full px-4 py-3 border-2 border-green-200 rounded-lg font-bold outline-none focus:border-green-500"
+        className="w-full px-4 py-3 border-2 border-stone-200 rounded-lg font-bold outline-none focus:border-amber-500"
       >
         <option value="">Selecione...</option>
         {POSTOS.map((p) => (
@@ -652,72 +651,72 @@ const exportarRelatorioPDF = (passagem) => {
     </div>
 
     <div>
-      <label className="block text-sm font-bold text-green-900 mb-2 uppercase">Data</label>
+      <label className="block text-sm font-bold text-slate-900 mb-2 uppercase">Data</label>
       <input
         type="date"
         value={formData.data}
         onChange={(e) => setFormData({ ...formData, data: e.target.value })}
-        className="w-full px-4 py-3 border-2 border-green-200 rounded-lg font-bold outline-none focus:border-green-500"
+        className="w-full px-4 py-3 border-2 border-stone-200 rounded-lg font-bold outline-none focus:border-amber-500"
       />
     </div>
 
     <div className="flex items-end">
-      <label className="flex items-center gap-2 px-4 py-3 bg-green-50 rounded-lg cursor-pointer w-full border-2 border-green-200 hover:bg-green-100 h-[52px]">
+      <label className="flex items-center gap-2 px-4 py-3 bg-stone-50 rounded-lg cursor-pointer w-full border-2 border-stone-200 hover:bg-stone-100 h-[52px]">
         <input
           type="checkbox"
           checked={formData.validacaoExec}
           onChange={(e) => setFormData({ ...formData, validacaoExec: e.target.checked })}
-          className="w-6 h-6 accent-green-600"
+          className="w-6 h-6 accent-amber-500"
         />
-        <span className="font-bold text-green-900 uppercase text-xs">
+        <span className="font-bold text-slate-900 uppercase text-xs">
           {TERMOS_LOGISTICOS.validacaoExecucao} {configuracoes.validacaoObrigatoria && <span className="text-red-500">*</span>}
         </span>
       </label>
     </div>
   </div>
 
-              <h3 className="font-black text-green-900 uppercase text-sm mb-4 tracking-tighter">{TERMOS_LOGISTICOS.validacoesTecnicas}</h3>
+              <h3 className="font-black text-slate-900 uppercase text-sm mb-4 tracking-tighter">{TERMOS_LOGISTICOS.validacoesTecnicas}</h3>
               <div className="grid md:grid-cols-3 gap-6 mb-8">
                 {[
                   { label: TERMOS_LOGISTICOS.dses, check: 'validacaoDSES', text: 'validacaoDSESTexto' },
                   { label: TERMOS_LOGISTICOS.chi, check: 'validacaoCHI', text: 'validacaoCHITexto' },
                   { label: TERMOS_LOGISTICOS.comp, check: 'validacaoComp', text: 'validacaoCompTexto' }
                 ].map(item => (
-                  <div key={item.label} className="bg-slate-50 p-4 rounded-xl border-2 border-slate-300 hover:border-green-300 transition-all">
+                  <div key={item.label} className="bg-slate-50 p-4 rounded-xl border-2 border-slate-300 hover:border-amber-300 transition-all">
                     <div className="flex justify-between items-center mb-3">
-                      <span className="font-black text-xs text-green-700 uppercase tracking-tighter">{item.label}</span>
-                      <input type="checkbox" checked={formData[item.check]} onChange={(e) => setFormData({ ...formData, [item.check]: e.target.checked })} className="w-6 h-6 accent-green-600 cursor-pointer" />
+                      <span className="font-black text-xs text-amber-700 uppercase tracking-tighter">{item.label}</span>
+                      <input type="checkbox" checked={formData[item.check]} onChange={(e) => setFormData({ ...formData, [item.check]: e.target.checked })} className="w-6 h-6 accent-amber-500 cursor-pointer" />
                     </div>
-                    <textarea placeholder={`Apontamentos de ${item.label}...`} value={formData[item.text]} onChange={(e) => setFormData({ ...formData, [item.text]: e.target.value })} className="w-full p-2 text-xs border rounded-lg h-24 resize-none focus:border-green-500 outline-none" />
+                    <textarea placeholder={`Apontamentos de ${item.label}...`} value={formData[item.text]} onChange={(e) => setFormData({ ...formData, [item.text]: e.target.value })} className="w-full p-2 text-xs border rounded-lg h-24 resize-none focus:border-amber-500 outline-none" />
                   </div>
                 ))}
               </div>
 
               <div className="mb-8 p-6 bg-slate-50 rounded-xl border-2 border-slate-200">
-                <h3 className="font-black text-green-900 uppercase text-sm mb-4 tracking-tighter">{TERMOS_LOGISTICOS.ocorrencias}</h3>
+                <h3 className="font-black text-slate-900 uppercase text-sm mb-4 tracking-tighter">{TERMOS_LOGISTICOS.ocorrencias}</h3>
                 <div className="grid md:grid-cols-4 gap-4 mb-4 items-end">
                   <div className="flex flex-col gap-1">
                     <label className="text-[10px] font-black uppercase text-slate-400 tracking-tighter">{TERMOS_LOGISTICOS.ocorrenciaCodigo}</label>
-                    <input type="text" placeholder="Codigo do registro" value={formData.ocorrenciaTipo} onChange={(e) => setFormData({ ...formData, ocorrenciaTipo: e.target.value })} className="px-4 py-3 border-2 border-slate-200 rounded-lg outline-none focus:border-green-500 font-bold text-sm" />
+                    <input type="text" placeholder="Codigo do registro" value={formData.ocorrenciaTipo} onChange={(e) => setFormData({ ...formData, ocorrenciaTipo: e.target.value })} className="px-4 py-3 border-2 border-slate-200 rounded-lg outline-none focus:border-amber-500 font-bold text-sm" />
                   </div>
                   <div className="md:col-span-2 flex flex-col gap-1">
                     <label className="text-[10px] font-black uppercase text-slate-400 tracking-tighter">Detalhamento</label>
-                    <textarea id="detalheInput" rows="1" placeholder="Descreva a ocorrencia..." value={formData.ocorrenciaDetalhe} onInput={autoExpand} onChange={(e) => setFormData({ ...formData, ocorrenciaDetalhe: e.target.value })} className="px-4 py-3 border-2 border-slate-200 rounded-lg outline-none focus:border-green-500 text-sm overflow-hidden min-h-[48px] resize-none leading-relaxed" />
+                    <textarea id="detalheInput" rows="1" placeholder="Descreva a ocorrencia..." value={formData.ocorrenciaDetalhe} onInput={autoExpand} onChange={(e) => setFormData({ ...formData, ocorrenciaDetalhe: e.target.value })} className="px-4 py-3 border-2 border-slate-200 rounded-lg outline-none focus:border-amber-500 text-sm overflow-hidden min-h-[48px] resize-none leading-relaxed" />
                   </div>
                   <div className="flex gap-2">
                     <div className="flex-1 flex flex-col gap-1">
                       <label className="text-[10px] font-black uppercase text-slate-400 tracking-tighter">Prioridade</label>
-                      <select value={formData.ocorrenciaPrioridade} onChange={(e) => setFormData({ ...formData, ocorrenciaPrioridade: e.target.value })} className={`w-full px-2 py-3 border-2 rounded-lg font-black text-xs uppercase outline-none h-[48px] ${formData.ocorrenciaPrioridade === 'Urgente' ? 'border-red-500 text-red-600 bg-red-50' : 'border-blue-500 text-blue-600 bg-blue-50'}`}>
+                      <select value={formData.ocorrenciaPrioridade} onChange={(e) => setFormData({ ...formData, ocorrenciaPrioridade: e.target.value })} className={`w-full px-2 py-3 border-2 rounded-lg font-black text-xs uppercase outline-none h-[48px] ${formData.ocorrenciaPrioridade === 'Urgente' ? 'border-red-500 text-red-600 bg-red-50' : 'border-amber-500 text-amber-700 bg-stone-50'}`}>
                         <option value="Normal">Normal</option>
                         <option value="Urgente">Urgente</option>
                       </select>
                     </div>
-                    <button onClick={adicionarOcorrencia} className="bg-green-600 text-white px-4 rounded-lg hover:bg-green-700 shadow-md active:scale-95 h-[48px] mt-auto"><Plus /></button>
+                    <button onClick={adicionarOcorrencia} className="bg-slate-900 text-white px-4 rounded-lg hover:bg-slate-800 shadow-md active:scale-95 h-[48px] mt-auto"><Plus /></button>
                   </div>
                 </div>
                 <div className="bg-white rounded-lg border overflow-hidden">
                   <table className="w-full table-fixed text-left text-sm">
-                    <thead className="bg-slate-100 text-slate-500 uppercase text-[10px] font-black tracking-widest">
+                    <thead className="bg-stone-100 text-stone-500 uppercase text-[10px] font-black tracking-widest">
                       <tr>
                         <th className="px-4 py-2 w-28">Prioridade</th>
                         <th className="px-4 py-2 w-40">{TERMOS_LOGISTICOS.ocorrenciaCodigo}</th>
@@ -730,9 +729,9 @@ const exportarRelatorioPDF = (passagem) => {
                         <tr><td colSpan="4" className="px-4 py-4 text-center text-slate-400 italic">Nenhum registro na lista</td></tr>
                       )}
                       {formData.ocorrenciasGerais.map((oc, i) => (
-                        <tr key={i} className="hover:bg-green-50">
-                          <td className="px-4 py-3 align-top"><span className={`px-2 py-1 rounded text-[10px] font-black uppercase ${oc.prioridade === 'Urgente' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'}`}>{oc.prioridade}</span></td>
-                          <td className="px-4 py-3 font-bold text-green-700 uppercase text-xs break-words align-top tracking-tighter">{oc.tipo}</td>
+                        <tr key={i} className="hover:bg-stone-50">
+                          <td className="px-4 py-3 align-top"><span className={`px-2 py-1 rounded text-[10px] font-black uppercase ${oc.prioridade === 'Urgente' ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-700'}`}>{oc.prioridade}</span></td>
+                          <td className="px-4 py-3 font-bold text-amber-700 uppercase text-xs break-words align-top tracking-tighter">{oc.tipo}</td>
                           <td className="px-4 py-3 text-slate-600 text-xs break-words whitespace-pre-wrap leading-relaxed align-top">{oc.detalhe}</td>
                           <td className="px-4 py-3 text-right align-top"><Trash2 size={16} className="text-red-400 cursor-pointer hover:text-red-600 ml-auto" onClick={() => setFormData({ ...formData, ocorrenciasGerais: formData.ocorrenciasGerais.filter((_, idx) => idx !== i) })} /></td>
                         </tr>
@@ -743,34 +742,34 @@ const exportarRelatorioPDF = (passagem) => {
               </div>
 
               <div className="grid md:grid-cols-2 gap-6 mb-8">
-                <div className="bg-slate-50 p-4 rounded-xl border-2 border-slate-300 hover:border-blue-300 transition-all">
+                <div className="bg-slate-50 p-4 rounded-xl border-2 border-slate-300 hover:border-amber-300 transition-all">
                   <div className="flex justify-between items-center mb-3">
-                    <span className="font-black text-xs text-blue-700 uppercase tracking-tighter">{TERMOS_LOGISTICOS.manobras}</span>
-                    <input type="checkbox" checked={formData.manobrasValidado} onChange={(e) => setFormData({ ...formData, manobrasValidado: e.target.checked })} className="w-6 h-6 accent-blue-600 cursor-pointer" />
+                    <span className="font-black text-xs text-amber-700 uppercase tracking-tighter">{TERMOS_LOGISTICOS.manobras}</span>
+                    <input type="checkbox" checked={formData.manobrasValidado} onChange={(e) => setFormData({ ...formData, manobrasValidado: e.target.checked })} className="w-6 h-6 accent-amber-500 cursor-pointer" />
                   </div>
-                  <textarea placeholder="Liste os movimentos pendentes..." value={formData.manobras} onChange={(e) => setFormData({ ...formData, manobras: e.target.value })} className="w-full p-3 text-xs border rounded-lg h-32 resize-none focus:border-blue-500 outline-none bg-white shadow-inner" />
+                  <textarea placeholder="Liste os movimentos pendentes..." value={formData.manobras} onChange={(e) => setFormData({ ...formData, manobras: e.target.value })} className="w-full p-3 text-xs border rounded-lg h-32 resize-none focus:border-amber-500 outline-none bg-white shadow-inner" />
                 </div>
-                <div className="bg-slate-50 p-4 rounded-xl border-2 border-slate-300 hover:border-green-300 transition-all">
+                <div className="bg-slate-50 p-4 rounded-xl border-2 border-slate-300 hover:border-amber-300 transition-all">
                   <div className="flex justify-between items-center mb-3">
-                    <span className="font-black text-xs text-green-700 uppercase tracking-tighter">
+                    <span className="font-black text-xs text-amber-700 uppercase tracking-tighter">
                       {TERMOS_LOGISTICOS.mrr} {configuracoes.mrrObrigatorio && <span className="text-red-500">* Obrigatorio</span>}
                     </span>
-                    <input type="checkbox" checked={formData.mrrValidado} onChange={(e) => setFormData({ ...formData, mrrValidado: e.target.checked })} className="w-6 h-6 accent-green-600 cursor-pointer" />
+                    <input type="checkbox" checked={formData.mrrValidado} onChange={(e) => setFormData({ ...formData, mrrValidado: e.target.checked })} className="w-6 h-6 accent-amber-500 cursor-pointer" />
                   </div>
-                  <textarea placeholder="Informe os detalhes da movimentacao..." value={formData.lancamentoMRR} onChange={(e) => setFormData({ ...formData, lancamentoMRR: e.target.value })} className="w-full p-3 text-xs border rounded-lg h-32 resize-none focus:border-green-500 outline-none bg-white shadow-inner" />
+                  <textarea placeholder="Informe os detalhes da movimentacao..." value={formData.lancamentoMRR} onChange={(e) => setFormData({ ...formData, lancamentoMRR: e.target.value })} className="w-full p-3 text-xs border rounded-lg h-32 resize-none focus:border-amber-500 outline-none bg-white shadow-inner" />
                 </div>
               </div>
 
               <div className="flex gap-4 justify-center mt-8">
-                <button onClick={salvar} className="px-8 py-3.5 bg-green-600 text-white rounded-xl hover:bg-green-700 font-bold text-lg shadow-lg flex items-center gap-3 active:scale-95 transition-all"><CheckCircle size={22} /> Salvar turno</button>
+                <button onClick={salvar} className="px-8 py-3.5 bg-slate-900 text-white rounded-xl hover:bg-slate-800 font-bold text-lg shadow-lg flex items-center gap-3 active:scale-95 transition-all"><CheckCircle size={22} /> Salvar turno</button>
                 <button onClick={() => setModalConfirm({ tipo: 'limpar' })} className="px-6 py-3.5 bg-slate-100 text-slate-600 rounded-xl hover:bg-slate-200 font-bold text-lg shadow-md active:scale-95 transition-all">Limpar</button>
               </div>
             </div>
           ) : (
             /* HISTÓRICO */
             <div className="bg-white rounded-xl shadow-xl p-6 md:p-8">
-              <div className="flex justify-between items-center mb-6 pb-3 border-b-4 border-yellow-400">
-                <h2 className="text-xl font-bold text-green-900 uppercase">{TERMOS_LOGISTICOS.historico}</h2>
+              <div className="flex justify-between items-center mb-6 pb-3 border-b-4 border-amber-300">
+                <h2 className="text-xl font-bold text-slate-900 uppercase">{TERMOS_LOGISTICOS.historico}</h2>
         {/* Barra de ações do histórico — versão responsiva e compacta */}
 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
 
@@ -779,7 +778,7 @@ const exportarRelatorioPDF = (passagem) => {
 
     <button
       onClick={() => gerarPDF(passagensVisíveis)}
-      className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-[10px] uppercase tracking-wider font-bold shadow-md"
+      className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-[10px] uppercase tracking-wider font-bold shadow-md"
     >
       <FileText size={12} className="inline-block mr-1" />
       Exportar PDF
@@ -787,7 +786,7 @@ const exportarRelatorioPDF = (passagem) => {
 
     <button
       onClick={() => gerarExcel(passagensVisíveis)}
-      className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-[10px] uppercase tracking-wider font-bold shadow-md"
+      className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-[10px] uppercase tracking-wider font-bold shadow-md"
     >
       <FileSpreadsheet size={12} className="inline-block mr-1" />
       Exportar Excel
@@ -818,7 +817,7 @@ const exportarRelatorioPDF = (passagem) => {
       placeholder="Ex: LUCAS..."
       value={filtroOperador}
       onChange={(e) => setFiltroOperador(e.target.value)}
-      className="px-4 py-2 rounded-lg border focus:border-green-500 font-bold text-sm"
+      className="px-4 py-2 rounded-lg border focus:border-amber-500 font-bold text-sm"
     />
   </div>
 
@@ -830,7 +829,7 @@ const exportarRelatorioPDF = (passagem) => {
       placeholder="Ex: ARMAZEM..."
       value={filtroUtd}
       onChange={(e) => setFiltroUtd(e.target.value)}
-      className="px-4 py-2 rounded-lg border focus:border-green-500 font-bold text-sm"
+      className="px-4 py-2 rounded-lg border focus:border-amber-500 font-bold text-sm"
     />
   </div>
 
@@ -842,7 +841,7 @@ const exportarRelatorioPDF = (passagem) => {
         type="date"
         value={filtroData}
         onChange={(e) => setFiltroData(e.target.value)}
-        className="px-4 py-2 rounded-lg border focus:border-green-500 font-bold text-sm"
+        className="px-4 py-2 rounded-lg border focus:border-amber-500 font-bold text-sm"
       />
     </div>
 
@@ -860,7 +859,7 @@ const exportarRelatorioPDF = (passagem) => {
 
               <div className="overflow-x-auto rounded-xl border">
                 <table className="w-full">
-                  <thead className="bg-green-600 text-white">
+                  <thead className="bg-slate-900 text-white">
                     <tr>
                       <th className="px-5 py-3 text-left uppercase text-[10px] font-black tracking-widest">Data/Hora</th>
                       <th className="px-5 py-3 text-left uppercase text-[10px] font-black tracking-widest">Operador</th>
@@ -891,23 +890,23 @@ const exportarRelatorioPDF = (passagem) => {
     return okOper && okUtd && okData;
   })
   .map(p => (
-    <tr key={p.id} className="border-b hover:bg-green-50 transition-colors">
+    <tr key={p.id} className="border-b hover:bg-stone-50 transition-colors">
       <td className="px-5 py-3.5 text-sm font-bold">{p.dataHora}</td>
       <td className="px-5 py-3.5 text-xs text-slate-500 font-bold">{p.operador}</td>
-      <td className="px-5 py-3.5 font-bold text-green-800 text-xs uppercase tracking-tighter">
+      <td className="px-5 py-3.5 font-bold text-slate-800 text-xs uppercase tracking-tighter">
         <div className="max-w-xs overflow-hidden text-ellipsis whitespace-nowrap" title={p.utdsString}>
           {p.utdsString || (Array.isArray(p.utdsSelecionadas) ? p.utdsSelecionadas.join(', ') : '')}
         </div>
       </td>
       <td className="px-5 py-3.5 text-xs">
-        <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-black uppercase tracking-tighter">
+        <span className="bg-amber-100 text-amber-700 px-2 py-1 rounded-full font-black uppercase tracking-tighter">
           {(p.ocorrenciasGerais || []).length} itens
         </span>
       </td>
       <td className="px-5 py-3.5 text-center">
         <button
           onClick={() => setDetalhesPassagem(p)}
-          className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[10px] font-black uppercase tracking-widest shadow-md"
+          className="px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-[10px] font-black uppercase tracking-widest shadow-md"
         >
           Visualizar
         </button>
@@ -932,18 +931,18 @@ const exportarRelatorioPDF = (passagem) => {
       <div ref={reportRef} className="flex flex-col overflow-y-auto bg-white p-6 md:p-8 max-h-[80vh]">
 
         {/* HEADER DO RELATÓRIO */}
-        <div className="bg-green-700 text-white p-5 rounded-2xl flex justify-between items-center border-b-8 border-yellow-400 mb-6">
+        <div className="bg-gradient-to-r from-slate-950 via-stone-900 to-amber-700 text-white p-5 rounded-2xl flex justify-between items-center border-b-8 border-amber-300 mb-6">
           <div className="flex items-center gap-3">
             <div>
               <h3 className="text-xl font-black uppercase tracking-tighter leading-none">{TERMOS_LOGISTICOS.relatorio}</h3>
-              <p className="text-xs text-green-100 font-bold mt-1 uppercase tracking-widest">
+              <p className="text-xs text-stone-200 font-bold mt-1 uppercase tracking-widest">
                 {detalhesPassagem.dataHora} - {TERMOS_LOGISTICOS.posto.toUpperCase()}: {detalhesPassagem.posto}
               </p>
             </div>
           </div>
 
           <div className="text-right">
-            <p className="text-[10px] font-black text-green-200 uppercase tracking-widest">Operador</p>
+            <p className="text-[10px] font-black text-amber-100 uppercase tracking-widest">Operador</p>
             <p className="font-black text-base uppercase tracking-tighter">{detalhesPassagem.operador}</p>
           </div>
         </div>
@@ -970,7 +969,7 @@ const exportarRelatorioPDF = (passagem) => {
           {/* UTDs */}
           <div className="bg-slate-50 p-4 rounded-2xl border">
             <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{TERMOS_LOGISTICOS.unidadePlural}</h4>
-            <p className="text-xs font-black text-green-800 uppercase tracking-tighter leading-relaxed">
+            <p className="text-xs font-black text-slate-800 uppercase tracking-tighter leading-relaxed">
               {detalhesPassagem.utdsString}
             </p>
           </div>
@@ -990,12 +989,12 @@ const exportarRelatorioPDF = (passagem) => {
                           className={`w-fit px-1.5 py-0.5 rounded text-[8px] font-black uppercase ${
                             oc.prioridade === 'Urgente'
                               ? 'bg-red-100 text-red-600'
-                              : 'bg-blue-100 text-blue-600'
+                              : 'bg-amber-100 text-amber-700'
                           }`}
                         >
                           {oc.prioridade}
                         </span>
-                        <span className="font-black text-green-700 uppercase tracking-tighter">{oc.tipo}</span>
+                        <span className="font-black text-amber-700 uppercase tracking-tighter">{oc.tipo}</span>
                       </div>
                     </td>
 
@@ -1011,7 +1010,7 @@ const exportarRelatorioPDF = (passagem) => {
           {/* MANOBRAS & MRR */}
           <div className="grid md:grid-cols-2 gap-5">
             <div>
-              <h4 className="text-xs font-black text-slate-800 border-l-4 border-blue-400 pl-3 uppercase tracking-widest mb-2">
+              <h4 className="text-xs font-black text-slate-800 border-l-4 border-amber-400 pl-3 uppercase tracking-widest mb-2">
                 {TERMOS_LOGISTICOS.manobras}
               </h4>
               <div className="bg-slate-50 p-4 rounded-2xl border min-h-[80px] text-xs text-slate-600 whitespace-pre-wrap leading-relaxed">
@@ -1020,7 +1019,7 @@ const exportarRelatorioPDF = (passagem) => {
             </div>
 
             <div>
-              <h4 className="text-xs font-black text-slate-800 border-l-4 border-orange-400 pl-3 uppercase tracking-widest mb-2">
+              <h4 className="text-xs font-black text-slate-800 border-l-4 border-slate-400 pl-3 uppercase tracking-widest mb-2">
                 {TERMOS_LOGISTICOS.mrrPlural}
               </h4>
               <div className="bg-slate-50 p-4 rounded-2xl border min-h-[80px] text-xs text-slate-600 whitespace-pre-wrap leading-relaxed">
@@ -1038,7 +1037,7 @@ const exportarRelatorioPDF = (passagem) => {
         {/* Exportar PDF Individual */}
 <button
   onClick={() => exportarRelatorioPDF(detalhesPassagem)}
-  className="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs uppercase tracking-widest shadow-md flex items-center gap-2"
+  className="px-6 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold text-xs uppercase tracking-widest shadow-md flex items-center gap-2"
 >
   <FileText size={14} className="text-white" />
   Exportar PDF
@@ -1047,7 +1046,7 @@ const exportarRelatorioPDF = (passagem) => {
 {/* Exportar Excel Individual */}
 <button
   onClick={() => exportarRelatorioExcel(detalhesPassagem)}
-  className="px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold text-xs uppercase tracking-widest shadow-md flex items-center gap-2"
+  className="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-xs uppercase tracking-widest shadow-md flex items-center gap-2"
 >
   <FileSpreadsheet size={14} className="text-white" />
   Exportar Excel
